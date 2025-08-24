@@ -16,15 +16,15 @@ public class UsuarioConverter {
 
     public Usuario paraUsuario(UsuarioDTO usuarioDTO) {
         return Usuario.builder()
-                .nome(UsuarioDTO.getNome())
-                .email(UsuarioDTO.getEmail())
-                .senha(UsuarioDTO.getSenha())
+                .nome(usuarioDTO.getNome())
+                .email(usuarioDTO.getEmail())
+                .senha(usuarioDTO.getSenha())
                 .enderecos(paraListaEndereco(usuarioDTO.getEnderecos()))
-                .telefones(paraListaTelefones(UsuarioDTO.getTelefones()))
+                .telefones(paraListaTelefones(usuarioDTO.getTelefones()))
                 .build();
     }
 
-    public List<Endereco> paraListaEndereco(List<EnderecoDTO> EnderecoDTOS){
+    public List<Endereco> paraListaEndereco(List<EnderecoDTO> enderecoDTOS){
 //        return enderecoDTOS.stream().map(this::paraEndereco).toList(); Transforma em lista
         List<Endereco> enderecos = new ArrayList<>();
         for(EnderecoDTO enderecoDTO : enderecoDTOS) {
@@ -55,17 +55,17 @@ public class UsuarioConverter {
                 .ddd(telefoneDTO.getDdd())
                 .build();
     }
-    public UsuarioDTO paraUsuarioDTO(UsuarioDTO usuarioDTO) {
+    public UsuarioDTO paraUsuarioDTO(Usuario usuarioDTO) {
         return UsuarioDTO.builder()
-                .nome(UsuarioDTO.getNome())
-                .email(UsuarioDTO.getEmail())
-                .senha(UsuarioDTO.getSenha())
+                .nome(usuarioDTO.getNome())
+                .email(usuarioDTO.getEmail())
+                .senha(usuarioDTO.getSenha())
                 .enderecos(paraListaEnderecoDTO(usuarioDTO.getEnderecos()))
-                .telefones(paraListaTelefonesDTO(UsuarioDTO.getTelefones()))
+                .telefones(paraListaTelefonesDTO(usuarioDTO.getTelefones()))
                 .build();
     }
 
-    public List<EnderecoDTO> paraListaEnderecoDTO(List<Endereco> EnderecoDTOS){
+    public List<EnderecoDTO> paraListaEnderecoDTO(List<Endereco> enderecoDTOS){
 //        return enderecoDTOS.stream().map(this::paraEndereco).toList(); Transforma em lista
         List<EnderecoDTO> enderecos = new ArrayList<>();
         for(Endereco enderecoDTO : enderecoDTOS) {
