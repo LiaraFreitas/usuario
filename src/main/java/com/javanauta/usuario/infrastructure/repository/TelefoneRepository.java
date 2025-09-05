@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TelefoneRepository extends JpaRepository<Telefone, Long> {
+
+    //Para cada entity criada eu preciso ter uma repository
+
 }

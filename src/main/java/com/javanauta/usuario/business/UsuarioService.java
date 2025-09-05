@@ -22,8 +22,11 @@ public class UsuarioService {
 
         public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO) {
                 emailExiste(usuarioDTO.getEmail());
+                //criptografa a senha
                 usuarioDTO.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
+                //converte usuarioDTO para usuarioEntity
                 Usuario usuario = usuarioConverter.paraUsuario(usuarioDTO);
+                //salva o usuario no BD e o BD retorna usuarioEntity convertemos então para UsuarioDTO
                 return usuarioConverter.paraUsuarioDTO(usuarioRepository.save(usuario));
 
 
@@ -39,6 +42,8 @@ public class UsuarioService {
                         throw new ConflictException("Email já cadastrado" + e.getCause());
                 }
         }
+
+        //Verifica se o email existe no banco de dados e sim retorna o email
         public boolean verificaEmailExistente(String email) {//Apenas chama o metodo da repository
                 return usuarioRepository.existsByEmail(email);
         }
@@ -56,6 +61,7 @@ public class UsuarioService {
                 //Buscamos o email do usuário através do token (tirar a obrigatoriedade do email)
                 String email = jwtUtil.extrairEmailToken(token.substring(7));
 
+                //Se o DTO for <> null então encriptografa a nova senha
                 dto.setSenha(dto.getSenha() != null ? passwordEncoder.encode(dto.getSenha()) : null);
 
                 //Busca os dados do usuário no banco de dados

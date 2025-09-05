@@ -14,6 +14,8 @@ import java.util.List;
 @Component
 public class UsuarioConverter {
 
+
+    //Tranforma Usuario em UsuarioDTO
     public Usuario paraUsuario(UsuarioDTO usuarioDTO) {
         return Usuario.builder()
                 .nome(usuarioDTO.getNome())
@@ -39,7 +41,6 @@ public class UsuarioConverter {
                 .numero(enderecoDTO.getNumero())
                 .cidade(enderecoDTO.getCidade())
                 .cep(enderecoDTO.getCep())
-                .cidade(enderecoDTO.getCidade())
                 .estado(enderecoDTO.getEstado())
                 .complemento(enderecoDTO.getComplemento())
                 .build();
@@ -55,6 +56,8 @@ public class UsuarioConverter {
                 .ddd(telefoneDTO.getDdd())
                 .build();
     }
+
+    //Transforma UsuarioDto em Usuario
     public UsuarioDTO paraUsuarioDTO(Usuario usuarioDTO) {
         return UsuarioDTO.builder()
                 .nome(usuarioDTO.getNome())
@@ -86,6 +89,7 @@ public class UsuarioConverter {
                 .build();
     }
 
+    //Transforma a lista de telefone e passa para o medoto paraTelefoneDTO
     public List<TelefoneDTO> paraListaTelefonesDTO(List<Telefone> telefoneDTOS) {
         return telefoneDTOS.stream().map(this::paraTelefoneDTO).toList(); //Transforma em lista
     }

@@ -9,9 +9,13 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+    //Para cada entity criada eu preciso ter uma repository
 
+    //Valida se o email existe no BD
     boolean existsByEmail(String email);
 
+    //Serve para evitar o retorno de informações nulas, ele trata o retorno nulo.
+    //Irá buscar o email e caso não retornar irá gerar em uma exceção na UserDetailsServiceImpl
     Optional<Usuario> findByEmail(String email);
 
     @Transactional

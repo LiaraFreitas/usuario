@@ -19,24 +19,29 @@ public class UsuarioController {
 
 
     private final UsuarioService usuarioService;
+    //Realizada a injeção de dependência
     private final AuthenticationManager authenticationManager;
+    //Realizada a injeção de dependência
     private final JwtUtil jwtUtil;
 
+    //Metodo criado para salvar usuário
     @PostMapping
     public ResponseEntity<UsuarioDTO> salvaUsuario(@RequestBody UsuarioDTO usuarioDTO) {
         return ResponseEntity.ok(usuarioService.salvaUsuario(usuarioDTO));
     }
 
-
+    //Metodo criado para realizar login, rebece o email,senha para realizar a autenticação
     @PostMapping("/login")
     public String login(@RequestBody UsuarioDTO usuarioDTO){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(usuarioDTO.getEmail(),
                         usuarioDTO.getSenha())
         );
+        //Transforma o email e senha em um Token
         return "Bearer " + jwtUtil.generateToken(authentication.getName());
     }
 
+    //Metodo reponsável por buscar as informações do usuário ao passar o email
     @GetMapping
     public ResponseEntity<Usuario> buscaUsuarioPorEmail(@RequestParam("email") String email) {
         return  ResponseEntity.ok(usuarioService.buscarUsuarioPorEmail(email));
