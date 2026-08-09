@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +28,11 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Builder
-@Table(name = "usuario")
+@Table(name = "usuario",
+    uniqueConstraints = {
+            @UniqueConstraint(name= "email_unique", columnNames = "email")
+    }
+)
 
 //UserDetails seria o gerenciador dos acessos, foi relalizado isto para que o usuário
 //seja validado como um usuário de acesso com login e senha
@@ -36,9 +41,9 @@ public class Usuario implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name =  "nome", length = 100)
+    @Column(name =  "nome")
     private String nome;
-    @Column(name =  "email", length = 100)
+    @Column(name =  "email")
     private String email;
     @Column(name =  "senha")
     private String senha;
