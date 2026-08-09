@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 
@@ -24,11 +23,11 @@ import java.time.LocalDateTime;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     // Define propriedades para armazenar instâncias de JwtUtil e UserDetailsService
-    private final com.javanauta.usuario.infrastructure.security.JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
     // Construtor que inicializa as propriedades com instâncias fornecidas
-    public JwtRequestFilter(com.javanauta.usuario.infrastructure.security.JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+    public JwtRequestFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
@@ -70,18 +69,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write(buildError(HttpStatus.UNAUTHORIZED.value(),
-                    "Tokem expirado",
-                    request.getRequestURI(),
+                    "Token expirado",
                     e.getMessage()));
         }
     }
 
-    private String buildError(int status, String mensagem, String path, String error) {
+    private String buildError(int status, String mensagem, String error) {
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .message(mensagem)
                 .error(error)
-                .path(path)
                 .build();
 
         ObjectMapper objectMapper = new ObjectMapper();
