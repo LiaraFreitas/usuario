@@ -36,7 +36,7 @@ public class UsuarioService {
         private final TelefoneRepository telefoneRepository;
         private final AuthenticationManager authenticationManager;
 
-        public static final String REGISTERED_EMAIL = "Email já cadastrado";
+        public static final String REGISTERED_EMAIL = "Email já cadastrado ";
         public static final String EMAIL_NOT_FOUND = "Email não encontrado";
         public static final String ID_NOT_FOUND = "ID não encontrado";
         public static final String INVALID_USERNAME = "Usuário ou senha inválida: ";
@@ -68,19 +68,19 @@ public class UsuarioService {
                 }
         }
 
-        public void emailExiste(String email) {//Verifica se o email existe e gera Excpetion
+        public void emailExiste(String email) {
                 try {
                         boolean existe = verificaEmailExistente(email);
                         if (existe) {
                                 throw new ConflictException(REGISTERED_EMAIL + email);
                         }
                 } catch (ConflictException e) {
-                        throw new ConflictException(REGISTERED_EMAIL + e.getCause());
+                        throw new ConflictException(REGISTERED_EMAIL + email, e.getCause());
                 }
         }
 
-        //Verifica se o email existe no banco de dados e sim retorna o email
-        public boolean verificaEmailExistente(String email) {//Apenas chama o metodo da repository
+
+        public boolean verificaEmailExistente(String email) {
                 return usuarioRepository.existsByEmail(email);
         }
 

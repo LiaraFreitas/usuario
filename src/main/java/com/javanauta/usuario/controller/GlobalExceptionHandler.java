@@ -1,5 +1,4 @@
 package com.javanauta.usuario.controller;
-
 import com.javanauta.usuario.infrastructure.exceptions.ConflictException;
 import com.javanauta.usuario.infrastructure.exceptions.IllegalArgumentException;
 import com.javanauta.usuario.infrastructure.exceptions.ResourceNotFoundException;
@@ -10,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
 import java.time.LocalDateTime;
 
 @ControllerAdvice
@@ -61,7 +59,6 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .message(mensagem)
                 .error(error)
-                .path(path)
                 .build();
 
 

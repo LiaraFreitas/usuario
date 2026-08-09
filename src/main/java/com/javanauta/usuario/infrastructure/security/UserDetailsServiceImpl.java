@@ -1,6 +1,4 @@
 package com.javanauta.usuario.infrastructure.security;
-
-
 import com.javanauta.usuario.infrastructure.entity.Usuario;
 import com.javanauta.usuario.infrastructure.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;

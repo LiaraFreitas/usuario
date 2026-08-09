@@ -1,6 +1,4 @@
 package com.javanauta.usuario.business.dto;
-
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

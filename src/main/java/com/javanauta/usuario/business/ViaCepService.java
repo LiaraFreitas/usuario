@@ -1,5 +1,4 @@
 package com.javanauta.usuario.business;
-
 import com.javanauta.usuario.infrastructure.clients.ViaCepClient;
 import com.javanauta.usuario.infrastructure.clients.ViaCepDTO;
 import com.javanauta.usuario.infrastructure.exceptions.IllegalArgumentException;

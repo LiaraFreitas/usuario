@@ -7,6 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EnderecoRepository extends JpaRepository<Endereco, Long> {
 
-    //Para cada entity criada eu preciso ter uma repository
 
 }

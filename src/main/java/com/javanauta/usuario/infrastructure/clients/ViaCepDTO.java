@@ -1,6 +1,4 @@
 package com.javanauta.usuario.infrastructure.clients;
-
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
