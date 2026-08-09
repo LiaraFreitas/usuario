@@ -1,5 +1,4 @@
 package com.javanauta.usuario.business;
-
 import com.javanauta.usuario.business.converter.UsuarioConverter;
 import com.javanauta.usuario.business.dto.EnderecoDTO;
 import com.javanauta.usuario.business.dto.TelefoneDTO;
@@ -14,7 +13,9 @@ import com.javanauta.usuario.infrastructure.repository.EnderecoRepository;
 import com.javanauta.usuario.infrastructure.repository.TelefoneRepository;
 import com.javanauta.usuario.infrastructure.repository.UsuarioRepository;
 import com.javanauta.usuario.infrastructure.security.JwtUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,9 +44,9 @@ public class UsuarioService {
 
 
 
-
+        @Transactional
         public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO) {
-                emailExiste(usuarioDTO.getEmail());
+               try{
                 //criptografa a senha
                 usuarioDTO.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
                 //converte usuarioDTO para usuarioEntity
@@ -53,6 +54,12 @@ public class UsuarioService {
                 //salva o usuario no BD e o BD retorna usuarioEntity convertemos então para UsuarioDTO
                 return usuarioConverter.paraUsuarioDTO(usuarioRepository.save(usuario));
 
+        } catch (DataIntegrityViolationException e) {
+                       if (e.getMessage().contains("email_unique")) {
+                               throw new ConflictException(REGISTERED_EMAIL + usuarioDTO.getEmail(), e);
+                       }
+               throw e;
+               }
         }
 
         public String autenticarUsuario(UsuarioDTO usuarioDTO) {
@@ -66,22 +73,6 @@ public class UsuarioService {
                 } catch (BadCredentialsException | UsernameNotFoundException | AuthorizationDeniedException e) {
                         throw new UnauthorizedException(INVALID_USERNAME, e.getCause());
                 }
-        }
-
-        public void emailExiste(String email) {
-                try {
-                        boolean existe = verificaEmailExistente(email);
-                        if (existe) {
-                                throw new ConflictException(REGISTERED_EMAIL + email);
-                        }
-                } catch (ConflictException e) {
-                        throw new ConflictException(REGISTERED_EMAIL + email, e.getCause());
-                }
-        }
-
-
-        public boolean verificaEmailExistente(String email) {
-                return usuarioRepository.existsByEmail(email);
         }
 
         public UsuarioDTO buscarUsuarioPorEmail (String email) {
