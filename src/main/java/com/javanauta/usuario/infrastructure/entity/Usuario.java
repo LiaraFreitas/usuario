@@ -31,11 +31,9 @@ import java.util.List;
 
 //UserDetails seria o gerenciador dos acessos, foi relalizado isto para que o usuário
 //seja validado como um usuário de acesso com login e senha
-public class Usuario  implements UserDetails {
-    //Cria e entidade telefone no banco de dados e faz a dependência da tabela usuário
+public class Usuario implements UserDetails {
 
     @Id
-    //Gera o ID de forma automática
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name =  "nome", length = 100)
@@ -51,7 +49,6 @@ public class Usuario  implements UserDetails {
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private List<Telefone> telefones;
 
-    //
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();

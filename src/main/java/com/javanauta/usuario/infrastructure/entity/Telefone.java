@@ -20,11 +20,8 @@ import lombok.Setter;
 @Builder
 @Table(name = "telefone")
 public class Telefone {
-    //Cria e entidade telefone no banco de dados e faz a dependência da tabela usuário
 
     @Id
-    //Gera o ID de forma automática
-
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "numero" , length = 10)

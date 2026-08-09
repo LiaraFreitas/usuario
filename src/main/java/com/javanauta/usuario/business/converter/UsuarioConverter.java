@@ -1,5 +1,4 @@
 package com.javanauta.usuario.business.converter;
-
 import com.javanauta.usuario.business.dto.EnderecoDTO;
 import com.javanauta.usuario.business.dto.TelefoneDTO;
 import com.javanauta.usuario.business.dto.UsuarioDTO;
@@ -29,12 +28,10 @@ public class UsuarioConverter {
     }
 
     public List<Endereco> paraListaEndereco(List<EnderecoDTO> enderecoDTOS){
-//        return enderecoDTOS.stream().map(this::paraEndereco).toList(); Transforma em lista
-        List<Endereco> enderecos = new ArrayList<>();
-        for(EnderecoDTO enderecoDTO : enderecoDTOS) {
-            enderecos.add(paraEndereco(enderecoDTO));
-        }
-        return enderecos;
+       return enderecoDTOS.stream()
+               .map(this::paraEndereco)
+               .toList();
+
     }
 
     public Endereco paraEndereco(EnderecoDTO enderecoDTO) {
