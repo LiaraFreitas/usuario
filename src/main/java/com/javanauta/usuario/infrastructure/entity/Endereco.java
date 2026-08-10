@@ -1,4 +1,5 @@
-package com.javanauta.usuario.infrastructure.entity;
+﻿package com.javanauta.user.infrastructure.entity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,17 +25,18 @@ public class Endereco {
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
     @Column(name = "rua")
-    private String rua;
+    private String street;
     @Column(name = "numero")
-    private Long numero;
+    private Long number;
     @Column(name = "complemento", length = 10)
-    private String complemento;
+    private String complement;
     @Column(name = "cidade", length = 150)
-    private String cidade;
+    private String city;
     @Column(name = "estado", length = 2)
-    private String estado;
+    private String state;
     @Column(name = "cep", length = 9)
     private String cep;
     @Column (name = "usuario_id")
-    private Long usuarioID;
+    private Long userId;
 }
+

@@ -1,6 +1,6 @@
-package com.javanauta.usuario.infrastructure.repository;
+﻿package com.javanauta.user.infrastructure.repository;
 
-import com.javanauta.usuario.infrastructure.entity.Usuario;
+import com.javanauta.user.infrastructure.entity.Usuario;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -10,8 +10,6 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    boolean existsByEmail(String email);
-
     //Serve para evitar o retorno de informações nulas, ele trata o retorno nulo.
     Optional<Usuario> findByEmail(String email);
 
@@ -19,3 +17,4 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
      void deleteByEmail(String email);
 
 }
+

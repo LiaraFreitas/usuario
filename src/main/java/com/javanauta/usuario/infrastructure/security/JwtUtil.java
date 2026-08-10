@@ -1,4 +1,4 @@
-package com.javanauta.usuario.infrastructure.security;
+﻿package com.javanauta.user.infrastructure.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -57,3 +57,4 @@ public class JwtUtil {
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
 }
+

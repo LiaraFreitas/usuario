@@ -1,5 +1,4 @@
-package com.javanauta.usuario.business.dto;
-
+﻿package com.javanauta.user.business.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,9 +15,10 @@ import java.util.List;
 @Builder
 public class UsuarioDTO {
 
-    private String nome;
+    private String name;
     private String email;
-    private String senha;
-    private List<EnderecoDTO> enderecos;
-    private List<TelefoneDTO> telefones;
+    private String password;
+    private List<EnderecoDTO> addresses;
+    private List<TelefoneDTO> phones;
 }
+

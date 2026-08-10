@@ -1,5 +1,4 @@
-package com.javanauta.usuario.infrastructure.entity;
-
+﻿package com.javanauta.user.infrastructure.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,25 +33,23 @@ import java.util.List;
     }
 )
 
-//UserDetails seria o gerenciador dos acessos, foi relalizado isto para que o usuário
-//seja validado como um usuário de acesso com login e senha
 public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name =  "nome")
-    private String nome;
+    private String name;
     @Column(name =  "email")
     private String email;
     @Column(name =  "senha")
-    private String senha;
+    private String password;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
-    private List<Endereco> enderecos;
+    private List<Endereco> addresses;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
-    private List<Telefone> telefones;
+    private List<Telefone> phones;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -61,7 +58,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public String getPassword() {
-        return senha;
+        return password;
     }
 
     @Override
@@ -69,3 +66,4 @@ public class Usuario implements UserDetails {
         return email;
     }
 }
+

@@ -1,14 +1,16 @@
-package com.javanauta.usuario.controller;
-import com.javanauta.usuario.infrastructure.exceptions.ConflictException;
-import com.javanauta.usuario.infrastructure.exceptions.IllegalArgumentException;
-import com.javanauta.usuario.infrastructure.exceptions.ResourceNotFoundException;
-import com.javanauta.usuario.infrastructure.exceptions.UnauthorizedException;
-import com.javanauta.usuario.infrastructure.exceptions.dto.ErrorResponseDTO;
+﻿package com.javanauta.user.controller;
+
+import com.javanauta.user.infrastructure.exceptions.ConflictException;
+import com.javanauta.user.infrastructure.exceptions.IllegalArgumentException;
+import com.javanauta.user.infrastructure.exceptions.ResourceNotFoundException;
+import com.javanauta.user.infrastructure.exceptions.UnauthorizedException;
+import com.javanauta.user.infrastructure.exceptions.dto.ErrorResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 import java.time.LocalDateTime;
 
 @ControllerAdvice
@@ -36,9 +38,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponseDTO> handleUnauthorizedExcpetion(UnauthorizedException ex,
-                                                              HttpServletRequest request) {
+                                                                       HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(buildError(HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage() ,
+                ex.getMessage(),
                 request.getRequestURI(),
                 "Unauthorized"
         ));
@@ -46,7 +48,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentsException(IllegalArgumentException ex,
-                                                                  HttpServletRequest request) {
+                                                                           HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildError(HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
                 request.getRequestURI(),
@@ -54,13 +56,12 @@ public class GlobalExceptionHandler {
         ));
     }
 
-    private ErrorResponseDTO buildError(int status, String mensagem, String path, String error) {
-        return   ErrorResponseDTO.builder()
+    private ErrorResponseDTO buildError(int status, String message, String path, String error) {
+        return ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
-                .message(mensagem)
+                .message(message)
                 .error(error)
                 .build();
-
-
     }
 }
+

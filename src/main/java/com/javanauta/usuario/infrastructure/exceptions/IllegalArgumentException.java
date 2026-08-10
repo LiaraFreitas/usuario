@@ -1,4 +1,4 @@
-package com.javanauta.usuario.infrastructure.exceptions;
+﻿package com.javanauta.user.infrastructure.exceptions;
 
 public class IllegalArgumentException extends RuntimeException {
     public IllegalArgumentException(String message) {
@@ -9,3 +9,4 @@ public class IllegalArgumentException extends RuntimeException {
         super(mensagem, throwable);
     }
 }
+

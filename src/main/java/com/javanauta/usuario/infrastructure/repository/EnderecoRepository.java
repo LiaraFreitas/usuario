@@ -1,6 +1,6 @@
-package com.javanauta.usuario.infrastructure.repository;
+﻿package com.javanauta.user.infrastructure.repository;
 
-import com.javanauta.usuario.infrastructure.entity.Endereco;
+import com.javanauta.user.infrastructure.entity.Endereco;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,3 +9,4 @@ public interface EnderecoRepository extends JpaRepository<Endereco, Long> {
 
 
 }
+

@@ -1,4 +1,4 @@
-package com.javanauta.usuario.infrastructure.clients;
+﻿package com.javanauta.user.infrastructure.clients;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,3 +29,4 @@ public class ViaCepDTO {
 
 
 }
+

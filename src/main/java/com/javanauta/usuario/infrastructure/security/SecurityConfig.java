@@ -1,4 +1,4 @@
-package com.javanauta.usuario.infrastructure.security;
+﻿package com.javanauta.user.infrastructure.security;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,3 +75,4 @@ public class SecurityConfig {
     }
 
 }
+

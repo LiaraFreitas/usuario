@@ -1,7 +1,8 @@
-package com.javanauta.usuario.business;
-import com.javanauta.usuario.infrastructure.clients.ViaCepClient;
-import com.javanauta.usuario.infrastructure.clients.ViaCepDTO;
-import com.javanauta.usuario.infrastructure.exceptions.IllegalArgumentException;
+﻿package com.javanauta.user.business;
+
+import com.javanauta.user.infrastructure.clients.ViaCepClient;
+import com.javanauta.user.infrastructure.clients.ViaCepDTO;
+import com.javanauta.user.infrastructure.exceptions.IllegalArgumentException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,19 +14,18 @@ public class ViaCepService {
 
     private final ViaCepClient client;
 
-    public ViaCepDTO buscarDadosEndereco(String cep) {
-        return client.buscaDadosEndereco(processarCep(cep));
-
+    public ViaCepDTO buscarDadosEndereco(String postalCode) {
+        return client.buscaDadosEndereco(processarCep(postalCode));
     }
 
-        private String processarCep (String cep){
-            String cepFormatado = cep.replace(" ", "").replace("-", "");
+    private String processarCep(String postalCode) {
+        String formattedPostalCode = postalCode.replace(" ", "").replace("-", "");
 
-            if (!cepFormatado.matches("\\d+") || !Objects.equals(cepFormatado.length(),8 )){
-                throw new IllegalArgumentException("O CEP contém caracteres inválidos, por favor verificar");
-            }
-            return cepFormatado;
+        if (!formattedPostalCode.matches("\\d+") || !Objects.equals(formattedPostalCode.length(), 8)) {
+            throw new IllegalArgumentException("O CEP contém caracteres inválidos, por favor verificar");
         }
-
+        return formattedPostalCode;
     }
+}
+
 

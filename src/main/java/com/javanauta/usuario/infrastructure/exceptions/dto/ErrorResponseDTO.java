@@ -1,4 +1,4 @@
-package com.javanauta.usuario.infrastructure.exceptions.dto;
+﻿package com.javanauta.user.infrastructure.exceptions.dto;
 
 
 import lombok.AllArgsConstructor;
@@ -23,3 +23,4 @@ public class ErrorResponseDTO {
 
 
 }
+

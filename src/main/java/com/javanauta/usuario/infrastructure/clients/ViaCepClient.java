@@ -1,4 +1,4 @@
-package com.javanauta.usuario.infrastructure.clients;
+﻿package com.javanauta.user.infrastructure.clients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,3 +10,4 @@ public interface ViaCepClient {
     ViaCepDTO buscaDadosEndereco(@PathVariable("cep") String cep);
 
 }
+

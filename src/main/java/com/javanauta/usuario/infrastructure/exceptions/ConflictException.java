@@ -1,13 +1,13 @@
-package com.javanauta.usuario.infrastructure.exceptions;
+﻿package com.javanauta.user.infrastructure.exceptions;
 
-public class ConflictException extends RuntimeException{
+public class ConflictException extends RuntimeException {
 
-    public ConflictException(String mensagem){
-        super(mensagem);
+    public ConflictException(String message) {
+        super(message);
     }
 
-    public  ConflictException (String mensagem, Throwable throwable){
-        super(mensagem, throwable);
-
+    public ConflictException(String message, Throwable throwable) {
+        super(message, throwable);
     }
 }
+

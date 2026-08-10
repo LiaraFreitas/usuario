@@ -1,4 +1,4 @@
-package com.javanauta.usuario.infrastructure.entity;
+﻿package com.javanauta.user.infrastructure.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,10 +25,10 @@ public class Telefone {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "numero" , length = 10)
-    private String numero;
+    private String number;
     @Column(name = "ddd", length = 3)
-    private String ddd;
+    private String areaCode;
     @Column (name = "usuario_id")
-    private Long usuarioID;
-
+    private Long userId;
 }
+

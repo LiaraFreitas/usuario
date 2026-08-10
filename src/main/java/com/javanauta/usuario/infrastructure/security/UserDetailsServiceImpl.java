@@ -1,6 +1,6 @@
-package com.javanauta.usuario.infrastructure.security;
-import com.javanauta.usuario.infrastructure.entity.Usuario;
-import com.javanauta.usuario.infrastructure.repository.UsuarioRepository;
+﻿package com.javanauta.user.infrastructure.security;
+import com.javanauta.user.infrastructure.entity.Usuario;
+import com.javanauta.user.infrastructure.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,8 +24,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // Cria e retorna um objeto UserDetails com base no usuário encontrado
         return org.springframework.security.core.userdetails.User
-                .withUsername(usuario.getEmail()) // Define o nome de usuário como o e-mail
-                .password(usuario.getSenha()) // Define a senha do usuário
-                .build(); // Constrói o objeto UserDetails
+                .withUsername(usuario.getEmail())
+                .password(usuario.getPassword())
+                .build();
     }
 }
+

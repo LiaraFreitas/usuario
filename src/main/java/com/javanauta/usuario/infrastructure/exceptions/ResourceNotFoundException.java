@@ -1,4 +1,4 @@
-package com.javanauta.usuario.infrastructure.exceptions;
+﻿package com.javanauta.user.infrastructure.exceptions;
 
 public class ResourceNotFoundException extends RuntimeException {
 
@@ -10,3 +10,4 @@ public class ResourceNotFoundException extends RuntimeException {
         super(mensagem, throwable);
     }
 }
+

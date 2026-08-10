@@ -1,4 +1,4 @@
-package com.javanauta.usuario.infrastructure.exceptions;
+﻿package com.javanauta.user.infrastructure.exceptions;
 import org.springframework.security.core.AuthenticationException;
 
 public class UnauthorizedException extends AuthenticationException {
@@ -11,3 +11,4 @@ public class UnauthorizedException extends AuthenticationException {
         super(mensagem, throwable);
     }
 }
+
