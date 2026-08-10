@@ -2,6 +2,7 @@ package com.javanauta.user.business.converter;
 
 import com.javanauta.user.business.dto.EnderecoDTO;
 import com.javanauta.user.business.dto.TelefoneDTO;
+import com.javanauta.user.business.dto.UserDTO;
 import com.javanauta.user.business.dto.UsuarioDTO;
 import com.javanauta.user.infrastructure.entity.Endereco;
 import com.javanauta.user.infrastructure.entity.Telefone;
@@ -13,7 +14,7 @@ import java.util.List;
 @Component
 public class UsuarioConverter {
 
-    public Usuario toUser(UsuarioDTO userDto) {
+    public Usuario toUser(UserDTO userDto) {
         return Usuario.builder()
                 .name(userDto.getName())
                 .email(userDto.getEmail())
