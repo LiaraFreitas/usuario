@@ -14,11 +14,11 @@ public class ViaCepService {
 
     private final ViaCepClient client;
 
-    public ViaCepDTO buscarDadosEndereco(String postalCode) {
-        return client.buscaDadosEndereco(processarCep(postalCode));
+    public ViaCepDTO fetchAddressByPostalCode(String postalCode) {
+        return client.fetchAddressByPostalCode(normalizePostalCode(postalCode));
     }
 
-    private String processarCep(String postalCode) {
+    private String normalizePostalCode(String postalCode) {
         String formattedPostalCode = postalCode.replace(" ", "").replace("-", "");
 
         if (!formattedPostalCode.matches("\\d+") || !Objects.equals(formattedPostalCode.length(), 8)) {
