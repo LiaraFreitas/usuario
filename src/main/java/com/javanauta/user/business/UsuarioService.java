@@ -1,9 +1,9 @@
 package com.javanauta.user.business;
 
 import com.javanauta.user.business.converter.UsuarioConverter;
-import com.javanauta.user.business.dto.EnderecoDTO;
-import com.javanauta.user.business.dto.TelefoneDTO;
-import com.javanauta.user.business.dto.UsuarioDTO;
+import com.javanauta.user.business.dto.AddressDTO;
+import com.javanauta.user.business.dto.PhoneDTO;
+import com.javanauta.user.business.dto.UserDTO;
 import com.javanauta.user.infrastructure.entity.Endereco;
 import com.javanauta.user.infrastructure.entity.Telefone;
 import com.javanauta.user.infrastructure.entity.Usuario;
@@ -44,7 +44,7 @@ public class UsuarioService {
    public static final String INVALID_USERNAME = "Usuário ou senha inválida: ";
 
    @Transactional
-   public UsuarioDTO createUser(UsuarioDTO userDto) {
+   public UserDTO createUser(UserDTO userDto) {
        try {
            userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
            Usuario user = userConverter.toUser(userDto);
@@ -57,7 +57,7 @@ public class UsuarioService {
        }
    }
 
-   public String authenticateUser(UsuarioDTO userDto) {
+   public String authenticateUser(UserDTO userDto) {
        try {
            Authentication authentication = authenticationManager.authenticate(
                    new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPassword())
@@ -68,7 +68,7 @@ public class UsuarioService {
        }
    }
 
-   public UsuarioDTO findUserByEmail(String emailAddress) {
+   public UserDTO findUserByEmail(String emailAddress) {
        try {
            return userConverter.toUserDTO(
                    userRepository.findByEmail(emailAddress)
@@ -83,7 +83,7 @@ public class UsuarioService {
        userRepository.deleteByEmail(emailAddress);
    }
 
-   public UsuarioDTO updateUser(String authToken, UsuarioDTO userDto) {
+   public UserDTO updateUser(String authToken, UserDTO userDto) {
        String emailAddress = jwtUtil.extractEmailFromToken(authToken.substring(7));
 
        userDto.setPassword(userDto.getPassword() != null ? passwordEncoder.encode(userDto.getPassword()) : null);
@@ -96,7 +96,7 @@ public class UsuarioService {
        return userConverter.toUserDTO(userRepository.save(user));
    }
 
-   public EnderecoDTO updateAddress(Long addressId, EnderecoDTO addressDto) {
+   public AddressDTO updateAddress(Long addressId, AddressDTO addressDto) {
        Endereco addressEntity = addressRepository.findById(addressId).orElseThrow(() ->
                new ResourceNotFoundException(ID_NOT_FOUND + addressId));
 
@@ -105,7 +105,7 @@ public class UsuarioService {
        return userConverter.toAddressDTO(addressRepository.save(address));
    }
 
-   public TelefoneDTO updatePhone(Long phoneId, TelefoneDTO phoneDto) {
+   public PhoneDTO updatePhone(Long phoneId, PhoneDTO phoneDto) {
        Telefone phoneEntity = phoneRepository.findById(phoneId).orElseThrow(() ->
                new ResourceNotFoundException(ID_NOT_FOUND + phoneId));
 
@@ -114,7 +114,7 @@ public class UsuarioService {
        return userConverter.toPhoneDTO(phoneRepository.save(phone));
    }
 
-   public EnderecoDTO addAddressForUser(String authToken, EnderecoDTO addressDto) {
+   public AddressDTO addAddressForUser(String authToken, AddressDTO addressDto) {
        String emailAddress = jwtUtil.extractEmailFromToken(authToken.substring(7));
        Usuario user = userRepository.findByEmail(emailAddress).orElseThrow(() ->
                new ResourceNotFoundException(EMAIL_NOT_FOUND + emailAddress));
@@ -124,7 +124,7 @@ public class UsuarioService {
        return userConverter.toAddressDTO(addressEntity);
    }
 
-   public TelefoneDTO addPhoneForUser(String authToken, TelefoneDTO phoneDto) {
+   public PhoneDTO addPhoneForUser(String authToken, PhoneDTO phoneDto) {
        String emailAddress = jwtUtil.extractEmailFromToken(authToken.substring(7));
        Usuario user = userRepository.findByEmail(emailAddress).orElseThrow(() ->
                new ResourceNotFoundException(EMAIL_NOT_FOUND + emailAddress));
