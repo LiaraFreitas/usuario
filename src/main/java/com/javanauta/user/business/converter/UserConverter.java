@@ -3,18 +3,18 @@ package com.javanauta.user.business.converter;
 import com.javanauta.user.business.dto.AddressDTO;
 import com.javanauta.user.business.dto.PhoneDTO;
 import com.javanauta.user.business.dto.UserDTO;
-import com.javanauta.user.infrastructure.entity.Endereco;
-import com.javanauta.user.infrastructure.entity.Telefone;
-import com.javanauta.user.infrastructure.entity.Usuario;
+import com.javanauta.user.infrastructure.entity.Address;
+import com.javanauta.user.infrastructure.entity.Phone;
+import com.javanauta.user.infrastructure.entity.User;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class UsuarioConverter {
+public class UserConverter {
 
-    public Usuario toUser(UserDTO userDto) {
-        return Usuario.builder()
+    public User toUser(UserDTO userDto) {
+        return User.builder()
                 .name(userDto.getName())
                 .email(userDto.getEmail())
                 .password(userDto.getPassword())
@@ -25,14 +25,14 @@ public class UsuarioConverter {
                 .build();
     }
 
-    public List<Endereco> toAddressList(List<AddressDTO> addressDtos) {
+    public List<Address> toAddressList(List<AddressDTO> addressDtos) {
         return addressDtos.stream()
                 .map(this::toAddress)
                 .toList();
     }
 
-    public Endereco toAddress(AddressDTO addressDto) {
-        return Endereco.builder()
+    public Address toAddress(AddressDTO addressDto) {
+        return Address.builder()
                 .street(addressDto.getStreet())
                 .number(addressDto.getNumber())
                 .city(addressDto.getCity())
@@ -42,18 +42,18 @@ public class UsuarioConverter {
                 .build();
     }
 
-    public List<Telefone> toPhoneList(List<PhoneDTO> phoneDtos) {
+    public List<Phone> toPhoneList(List<PhoneDTO> phoneDtos) {
         return phoneDtos.stream().map(this::toPhone).toList();
     }
 
-    public Telefone toPhone(PhoneDTO phoneDto) {
-        return Telefone.builder()
+    public Phone toPhone(PhoneDTO phoneDto) {
+        return Phone.builder()
                 .number(phoneDto.getNumber())
                 .areaCode(phoneDto.getAreaCode())
                 .build();
     }
 
-    public UserDTO toUserDTO(Usuario userEntity) {
+    public UserDTO toUserDTO(User userEntity) {
         return UserDTO.builder()
                 .name(userEntity.getName())
                 .email(userEntity.getEmail())
@@ -65,11 +65,11 @@ public class UsuarioConverter {
                 .build();
     }
 
-    public List<AddressDTO> toAddressDTOList(List<Endereco> addresses) {
+    public List<AddressDTO> toAddressDTOList(List<Address> addresses) {
         return addresses.stream().map(this::toAddressDTO).toList();
     }
 
-    public AddressDTO toAddressDTO(Endereco addressEntity) {
+    public AddressDTO toAddressDTO(Address addressEntity) {
         return AddressDTO.builder()
                 .id(addressEntity.getId())
                 .street(addressEntity.getStreet())
@@ -81,11 +81,11 @@ public class UsuarioConverter {
                 .build();
     }
 
-    public List<PhoneDTO> toPhoneDTOList(List<Telefone> phones) {
+    public List<PhoneDTO> toPhoneDTOList(List<Phone> phones) {
         return phones.stream().map(this::toPhoneDTO).toList();
     }
 
-    public PhoneDTO toPhoneDTO(Telefone phoneEntity) {
+    public PhoneDTO toPhoneDTO(Phone phoneEntity) {
         return PhoneDTO.builder()
                 .id(phoneEntity.getId())
                 .number(phoneEntity.getNumber())
@@ -93,8 +93,8 @@ public class UsuarioConverter {
                 .build();
     }
 
-    public Usuario updateUser(UserDTO userDto, Usuario entity) {
-        return Usuario.builder()
+    public User updateUser(UserDTO userDto, User entity) {
+        return User.builder()
                 .name(userDto.getName() != null ? userDto.getName() : entity.getName())
                 .id(entity.getId())
                 .password(userDto.getPassword() != null ? userDto.getPassword() : entity.getPassword())
@@ -104,8 +104,8 @@ public class UsuarioConverter {
                 .build();
     }
 
-    public Endereco updateAddress(AddressDTO addressDto, Endereco entity) {
-        return Endereco.builder()
+    public Address updateAddress(AddressDTO addressDto, Address entity) {
+        return Address.builder()
                 .id(entity.getId())
                 .street(addressDto.getStreet() != null ? addressDto.getStreet() : entity.getStreet())
                 .number(addressDto.getNumber() != null ? addressDto.getNumber() : entity.getNumber())
@@ -117,8 +117,8 @@ public class UsuarioConverter {
                 .build();
     }
 
-    public Telefone updatePhone(PhoneDTO phoneDto, Telefone entity) {
-        return Telefone.builder()
+    public Phone updatePhone(PhoneDTO phoneDto, Phone entity) {
+        return Phone.builder()
                 .id(entity.getId())
                 .areaCode(phoneDto.getAreaCode() != null ? phoneDto.getAreaCode() : entity.getAreaCode())
                 .number(phoneDto.getNumber() != null ? phoneDto.getNumber() : entity.getNumber())
@@ -126,8 +126,8 @@ public class UsuarioConverter {
                 .build();
     }
 
-    public Endereco toAddressEntity(AddressDTO addressDto, Long userId) {
-        return Endereco.builder()
+    public Address toAddressEntity(AddressDTO addressDto, Long userId) {
+        return Address.builder()
                 .street(addressDto.getStreet())
                 .city(addressDto.getCity())
                 .cep(addressDto.getCep())
@@ -138,8 +138,8 @@ public class UsuarioConverter {
                 .build();
     }
 
-    public Telefone toPhoneEntity(PhoneDTO phoneDto, Long userId) {
-        return Telefone.builder()
+    public Phone toPhoneEntity(PhoneDTO phoneDto, Long userId) {
+        return Phone.builder()
                 .number(phoneDto.getNumber())
                 .areaCode(phoneDto.getAreaCode())
                 .userId(userId)

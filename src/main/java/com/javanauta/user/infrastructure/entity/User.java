@@ -33,7 +33,7 @@ import java.util.List;
     }
 )
 
-public class Usuario implements UserDetails {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,10 +46,10 @@ public class Usuario implements UserDetails {
     private String password;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
-    private List<Endereco> addresses;
+    private List<Address> addresses;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
-    private List<Telefone> phones;
+    private List<Phone> phones;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

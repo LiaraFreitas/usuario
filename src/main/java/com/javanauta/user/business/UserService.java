@@ -1,18 +1,19 @@
 package com.javanauta.user.business;
 
-import com.javanauta.user.business.converter.UsuarioConverter;
+
+import com.javanauta.user.business.converter.UserConverter;
 import com.javanauta.user.business.dto.AddressDTO;
 import com.javanauta.user.business.dto.PhoneDTO;
 import com.javanauta.user.business.dto.UserDTO;
-import com.javanauta.user.infrastructure.entity.Endereco;
-import com.javanauta.user.infrastructure.entity.Telefone;
-import com.javanauta.user.infrastructure.entity.Usuario;
+import com.javanauta.user.infrastructure.entity.Address;
+import com.javanauta.user.infrastructure.entity.Phone;
+import com.javanauta.user.infrastructure.entity.User;
 import com.javanauta.user.infrastructure.exceptions.ConflictException;
 import com.javanauta.user.infrastructure.exceptions.ResourceNotFoundException;
 import com.javanauta.user.infrastructure.exceptions.UnauthorizedException;
-import com.javanauta.user.infrastructure.repository.EnderecoRepository;
-import com.javanauta.user.infrastructure.repository.TelefoneRepository;
-import com.javanauta.user.infrastructure.repository.UsuarioRepository;
+import com.javanauta.user.infrastructure.repository.AddressRepository;
+import com.javanauta.user.infrastructure.repository.PhoneRepository;
+import com.javanauta.user.infrastructure.repository.UserRepository;
 import com.javanauta.user.infrastructure.security.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +29,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UsuarioService {
+public class UserService {
 
-   private final UsuarioRepository userRepository;
-   private final UsuarioConverter userConverter;
+   private final UserRepository userRepository;
+   private final UserConverter userConverter;
    private final PasswordEncoder passwordEncoder;
    private final JwtUtil jwtUtil;
-   private final EnderecoRepository addressRepository;
-   private final TelefoneRepository phoneRepository;
+   private final AddressRepository addressRepository;
+   private final PhoneRepository phoneRepository;
    private final AuthenticationManager authenticationManager;
 
    public static final String REGISTERED_EMAIL = "Email já cadastrado ";
@@ -47,7 +48,7 @@ public class UsuarioService {
    public UserDTO createUser(UserDTO userDto) {
        try {
            userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-           Usuario user = userConverter.toUser(userDto);
+           User user = userConverter.toUser(userDto);
            return userConverter.toUserDTO(userRepository.save(user));
        } catch (DataIntegrityViolationException e) {
            if (e.getMessage().contains("email_unique")) {
@@ -88,49 +89,49 @@ public class UsuarioService {
 
        userDto.setPassword(userDto.getPassword() != null ? passwordEncoder.encode(userDto.getPassword()) : null);
 
-       Usuario userEntity = userRepository.findByEmail(emailAddress).orElseThrow(() ->
+       User userEntity = userRepository.findByEmail(emailAddress).orElseThrow(() ->
                new ResourceNotFoundException(EMAIL_NOT_FOUND));
 
-       Usuario user = userConverter.updateUser(userDto, userEntity);
+       User user = userConverter.updateUser(userDto, userEntity);
 
        return userConverter.toUserDTO(userRepository.save(user));
    }
 
    public AddressDTO updateAddress(Long addressId, AddressDTO addressDto) {
-       Endereco addressEntity = addressRepository.findById(addressId).orElseThrow(() ->
+       Address addressEntity = addressRepository.findById(addressId).orElseThrow(() ->
                new ResourceNotFoundException(ID_NOT_FOUND + addressId));
 
-       Endereco address = userConverter.updateAddress(addressDto, addressEntity);
+       Address address = userConverter.updateAddress(addressDto, addressEntity);
 
        return userConverter.toAddressDTO(addressRepository.save(address));
    }
 
    public PhoneDTO updatePhone(Long phoneId, PhoneDTO phoneDto) {
-       Telefone phoneEntity = phoneRepository.findById(phoneId).orElseThrow(() ->
+       Phone phoneEntity = phoneRepository.findById(phoneId).orElseThrow(() ->
                new ResourceNotFoundException(ID_NOT_FOUND + phoneId));
 
-       Telefone phone = userConverter.updatePhone(phoneDto, phoneEntity);
+       Phone phone = userConverter.updatePhone(phoneDto, phoneEntity);
 
        return userConverter.toPhoneDTO(phoneRepository.save(phone));
    }
 
    public AddressDTO addAddressForUser(String authToken, AddressDTO addressDto) {
        String emailAddress = jwtUtil.extractEmailFromToken(authToken.substring(7));
-       Usuario user = userRepository.findByEmail(emailAddress).orElseThrow(() ->
+       User user = userRepository.findByEmail(emailAddress).orElseThrow(() ->
                new ResourceNotFoundException(EMAIL_NOT_FOUND + emailAddress));
 
-       Endereco address = userConverter.toAddressEntity(addressDto, user.getId());
-       Endereco addressEntity = addressRepository.save(address);
+       Address address = userConverter.toAddressEntity(addressDto, user.getId());
+       Address addressEntity = addressRepository.save(address);
        return userConverter.toAddressDTO(addressEntity);
    }
 
    public PhoneDTO addPhoneForUser(String authToken, PhoneDTO phoneDto) {
        String emailAddress = jwtUtil.extractEmailFromToken(authToken.substring(7));
-       Usuario user = userRepository.findByEmail(emailAddress).orElseThrow(() ->
+       User user = userRepository.findByEmail(emailAddress).orElseThrow(() ->
                new ResourceNotFoundException(EMAIL_NOT_FOUND + emailAddress));
 
-       Telefone phone = userConverter.toPhoneEntity(phoneDto, user.getId());
-       Telefone phoneEntity = phoneRepository.save(phone);
+       Phone phone = userConverter.toPhoneEntity(phoneDto, user.getId());
+       Phone phoneEntity = phoneRepository.save(phone);
        return userConverter.toPhoneDTO(phoneEntity);
    }
 }

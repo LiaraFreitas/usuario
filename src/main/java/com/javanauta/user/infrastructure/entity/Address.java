@@ -19,7 +19,7 @@ import lombok.Setter;
 @Entity
 @Builder
 @Table(name = "endereco")
-public class Endereco {
+public class Address {
 
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
