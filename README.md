@@ -63,14 +63,7 @@ Os testes são desenvolvidos utilizando:
 
 * JUnit
 * Mockito
-
-## 🐳 Docker
-
-O projeto possui configuração para execução utilizando Docker.
-
-```bash
-docker compose up -d
-```
+---
 
 ## ▶️ Como executar
 
