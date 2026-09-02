@@ -1,4 +1,4 @@
-package com.javanauta.user.business.dto;
+package com.javanauta.user.business.dto.out;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,12 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDTO {
+public class UserDTOResponse {
 
     private String name;
     private String email;
-    private String password;
-    private List<AddressDTO> addresses;
-    private List<PhoneDTO> phones;
+    private List<AddressDTOResponse> addresses;
+    private List<PhoneDTOResponse> phones;
 }
 

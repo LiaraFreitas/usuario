@@ -1,4 +1,4 @@
-package com.javanauta.user.business.dto;
+package com.javanauta.user.business.dto.out;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PhoneDTO {
+public class PhoneDTOResponse {
 
-    private Long id;
+
     private String number;
     private String areaCode;
 }

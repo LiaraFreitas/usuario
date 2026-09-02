@@ -2,9 +2,12 @@ package com.javanauta.user.controller;
 
 import com.javanauta.user.business.UserService;
 import com.javanauta.user.business.ViaCepService;
-import com.javanauta.user.business.dto.AddressDTO;
-import com.javanauta.user.business.dto.PhoneDTO;
-import com.javanauta.user.business.dto.UserDTO;
+import com.javanauta.user.business.dto.in.AddressDTORequest;
+import com.javanauta.user.business.dto.in.PhoneDTORequest;
+import com.javanauta.user.business.dto.in.UserDTORequest;
+import com.javanauta.user.business.dto.out.AddressDTOResponse;
+import com.javanauta.user.business.dto.out.PhoneDTOResponse;
+import com.javanauta.user.business.dto.out.UserDTOResponse;
 import com.javanauta.user.infrastructure.clients.ViaCepDTO;
 import com.javanauta.user.infrastructure.security.SecurityConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,8 +43,13 @@ public class UserController {
     @ApiResponse(responseCode = "401", description = "Usuário já cadastrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDto) {
-        return ResponseEntity.ok(userService.createUser(userDto));
+    public ResponseEntity<UserDTOResponse> createUser(@RequestBody UserDTORequest userDTORequest) {
+
+        UserDTOResponse userDTOResponse = userService.createUser(userDTORequest);
+
+        return ResponseEntity.
+                status(HttpStatus.CREATED)
+                .body(userDTOResponse);
     }
 
     @Operation(summary = "Realizar Login", description = "Efetua o login do usuário")
@@ -49,8 +58,8 @@ public class UserController {
     @ApiResponse(responseCode = "403", description = "Usuário não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDTO userDto) {
-        return ResponseEntity.ok(userService.authenticateUser(userDto));
+    public ResponseEntity<String> login(@RequestBody UserDTORequest userDtoRequest) {
+        return ResponseEntity.ok(userService.authenticateUser(userDtoRequest));
     }
 
     @Operation(summary = "Busca usuário por email", description = "Busca as informações do usuário por email")
@@ -59,7 +68,7 @@ public class UserController {
     @ApiResponse(responseCode = "403", description = "Usuário não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @GetMapping
-    public ResponseEntity<UserDTO> findUserByEmail(@RequestParam("email") String emailAddress) {
+    public ResponseEntity<UserDTOResponse> findUserByEmail(@RequestParam("email") String emailAddress) {
         return ResponseEntity.ok(userService.findUserByEmail(emailAddress));
     }
 
@@ -80,9 +89,17 @@ public class UserController {
     @ApiResponse(responseCode = "403", description = "Usuário não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @PutMapping
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDto,
-                                                  @RequestHeader("Authorization") String authToken) {
-        return ResponseEntity.ok(userService.updateUser(authToken, userDto));
+    public ResponseEntity<UserDTOResponse> updateUser(@RequestBody UserDTORequest userDTORequest,
+                                                      @RequestHeader("Authorization") String authToken) {
+
+        UserDTOResponse userDTOResponse = userService.updateUser(authToken, userDTORequest);
+
+
+        return ResponseEntity.
+                status(HttpStatus.CREATED)
+                .body(userDTOResponse);
+
+
     }
 
     @Operation(summary = "Atualiza dados do endereço", description = "Atualiza dados do endereço do usuário através do ID")
@@ -91,9 +108,16 @@ public class UserController {
     @ApiResponse(responseCode = "403", description = "Endereço não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @PutMapping("/endereco")
-    public ResponseEntity<AddressDTO> updateAddress(@RequestBody AddressDTO addressDto,
-                                                    @RequestParam("id") Long addressId) {
-        return ResponseEntity.ok(userService.updateAddress(addressId, addressDto));
+    public ResponseEntity<AddressDTOResponse> updateAddress(@RequestBody AddressDTORequest addressDTORequest,
+                                                            @RequestParam("id") Long addressId) {
+
+
+        AddressDTOResponse addressDTOResponse = userService.updateAddress(addressId, addressDTORequest);
+
+        return ResponseEntity.
+                status(HttpStatus.CREATED)
+                .body(addressDTOResponse);
+
     }
 
     @Operation(summary = "Atualiza dados do telefone", description = "Atualiza dados do telefone do usuário através do ID")
@@ -102,27 +126,41 @@ public class UserController {
     @ApiResponse(responseCode = "403", description = "Telefone não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @PutMapping("/telefone")
-    public ResponseEntity<PhoneDTO> updatePhone(@RequestBody PhoneDTO phoneDto,
-                                                    @RequestParam("id") Long phoneId) {
-        return ResponseEntity.ok(userService.updatePhone(phoneId, phoneDto));
+    public ResponseEntity<PhoneDTOResponse> updatePhone(@RequestBody PhoneDTORequest phoneDTORequest,
+                                                        @RequestParam("id") Long phoneId) {
+
+        PhoneDTOResponse phoneDTOResponse = userService.updatePhone(phoneId, phoneDTORequest);
+
+        return ResponseEntity.
+                status(HttpStatus.CREATED)
+                .body(phoneDTOResponse);
+
     }
 
     @Operation(summary = "Salvar endereço do usuário", description = "Cria um novo endereço")
     @ApiResponse(responseCode = "200", description = "Endereço salvo com sucesso")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @PostMapping("/endereco")
-    public ResponseEntity<AddressDTO> addAddress(@RequestBody AddressDTO addressDto,
-                                                  @RequestHeader("Authorization") String authToken) {
-        return ResponseEntity.ok(userService.addAddressForUser(authToken, addressDto));
+    public ResponseEntity<AddressDTOResponse> addAddress(@RequestBody AddressDTORequest addressDtoRequest,
+                                                         @RequestHeader("Authorization") String authToken) {
+      AddressDTOResponse addressDTOResponse = userService.addAddressForUser(authToken, addressDtoRequest);
+
+      return ResponseEntity.
+              status(HttpStatus.CREATED)
+              .body(addressDTOResponse);
+
     }
 
     @Operation(summary = "Salvar telefone do usuário", description = "Cria um novo telefone")
     @ApiResponse(responseCode = "200", description = "Telefone salvo com sucesso")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @PostMapping("/telefone")
-    public ResponseEntity<PhoneDTO> addPhone(@RequestBody PhoneDTO phoneDto,
-                                                @RequestHeader("Authorization") String authToken) {
-        return ResponseEntity.ok(userService.addPhoneForUser(authToken, phoneDto));
+    public ResponseEntity<PhoneDTOResponse> addPhone(@RequestBody PhoneDTORequest phoneDtoRequest,
+                                                     @RequestHeader("Authorization") String authToken) {
+        PhoneDTOResponse phoneDTOResponse = userService.addPhoneForUser(authToken, phoneDtoRequest);
+        return ResponseEntity.
+                status(HttpStatus.CREATED)
+                .body(phoneDTOResponse);
     }
 
     @Operation(summary = "Busca CEP do usuário", description = "Busca CEP do usuário")
