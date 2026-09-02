@@ -2,9 +2,12 @@ package com.javanauta.user.business;
 
 
 import com.javanauta.user.business.converter.UserConverter;
-import com.javanauta.user.business.dto.AddressDTO;
-import com.javanauta.user.business.dto.PhoneDTO;
-import com.javanauta.user.business.dto.UserDTO;
+import com.javanauta.user.business.dto.in.AddressDTORequest;
+import com.javanauta.user.business.dto.in.PhoneDTORequest;
+import com.javanauta.user.business.dto.in.UserDTORequest;
+import com.javanauta.user.business.dto.out.AddressDTOResponse;
+import com.javanauta.user.business.dto.out.PhoneDTOResponse;
+import com.javanauta.user.business.dto.out.UserDTOResponse;
 import com.javanauta.user.infrastructure.entity.Address;
 import com.javanauta.user.infrastructure.entity.Phone;
 import com.javanauta.user.infrastructure.entity.User;
@@ -45,23 +48,26 @@ public class UserService {
    public static final String INVALID_USERNAME = "Usuário ou senha inválida: ";
 
    @Transactional
-   public UserDTO createUser(UserDTO userDto) {
+   public UserDTOResponse createUser(UserDTORequest userDtoRequest) {
        try {
-           userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-           User user = userConverter.toUser(userDto);
-           return userConverter.toUserDTO(userRepository.save(user));
+           userDtoRequest.setPassword(passwordEncoder.encode(userDtoRequest.getPassword()));
+
+           User user = userConverter.toUserEntity(userDtoRequest);
+
+           return userConverter.toUserResponse(userRepository.save(user));
+
        } catch (DataIntegrityViolationException e) {
            if (e.getMessage().contains("email_unique")) {
-               throw new ConflictException(REGISTERED_EMAIL + userDto.getEmail(), e);
+               throw new ConflictException(REGISTERED_EMAIL + userDtoRequest.getEmail(), e);
            }
            throw e;
        }
    }
 
-   public String authenticateUser(UserDTO userDto) {
+   public String authenticateUser(UserDTORequest userDtoRequest) {
        try {
            Authentication authentication = authenticationManager.authenticate(
-                   new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPassword())
+                   new UsernamePasswordAuthenticationToken(userDtoRequest.getEmail(), userDtoRequest.getPassword())
            );
            return "Bearer " + jwtUtil.generateToken(authentication.getName());
        } catch (BadCredentialsException | UsernameNotFoundException | AuthorizationDeniedException e) {
@@ -69,9 +75,9 @@ public class UserService {
        }
    }
 
-   public UserDTO findUserByEmail(String emailAddress) {
+   public UserDTOResponse findUserByEmail(String emailAddress) {
        try {
-           return userConverter.toUserDTO(
+           return userConverter.toUserResponse(
                    userRepository.findByEmail(emailAddress)
                            .orElseThrow(() -> new ResourceNotFoundException(EMAIL_NOT_FOUND + emailAddress))
            );
@@ -84,55 +90,51 @@ public class UserService {
        userRepository.deleteByEmail(emailAddress);
    }
 
-   public UserDTO updateUser(String authToken, UserDTO userDto) {
+   public UserDTOResponse updateUser(String authToken, UserDTORequest userDTORequest) {
        String emailAddress = jwtUtil.extractEmailFromToken(authToken.substring(7));
-
-       userDto.setPassword(userDto.getPassword() != null ? passwordEncoder.encode(userDto.getPassword()) : null);
-
+       userDTORequest.setPassword(userDTORequest.getPassword() != null ? passwordEncoder.encode(userDTORequest.getPassword()) : null);
        User userEntity = userRepository.findByEmail(emailAddress).orElseThrow(() ->
                new ResourceNotFoundException(EMAIL_NOT_FOUND));
-
-       User user = userConverter.updateUser(userDto, userEntity);
-
-       return userConverter.toUserDTO(userRepository.save(user));
+       User user = userConverter.updateUser(userDTORequest, userEntity);
+       return userConverter.toUserResponse(userRepository.save(user));
    }
 
-   public AddressDTO updateAddress(Long addressId, AddressDTO addressDto) {
+   public AddressDTOResponse updateAddress(Long addressId, AddressDTORequest addressDtoRequest) {
        Address addressEntity = addressRepository.findById(addressId).orElseThrow(() ->
                new ResourceNotFoundException(ID_NOT_FOUND + addressId));
 
-       Address address = userConverter.updateAddress(addressDto, addressEntity);
+       Address address = userConverter.updateAddress(addressDtoRequest, addressEntity);
 
-       return userConverter.toAddressDTO(addressRepository.save(address));
+       return userConverter.toAddressResponse(addressRepository.save(address));
    }
 
-   public PhoneDTO updatePhone(Long phoneId, PhoneDTO phoneDto) {
+   public PhoneDTOResponse updatePhone(Long phoneId, PhoneDTORequest phoneDtoRequest) {
        Phone phoneEntity = phoneRepository.findById(phoneId).orElseThrow(() ->
                new ResourceNotFoundException(ID_NOT_FOUND + phoneId));
 
-       Phone phone = userConverter.updatePhone(phoneDto, phoneEntity);
+       Phone phone = userConverter.updatePhone(phoneDtoRequest, phoneEntity);
 
-       return userConverter.toPhoneDTO(phoneRepository.save(phone));
+       return userConverter.toPhoneResponse(phoneRepository.save(phone));
    }
 
-   public AddressDTO addAddressForUser(String authToken, AddressDTO addressDto) {
+   public AddressDTOResponse addAddressForUser(String authToken, AddressDTORequest addressDtoRequest) {
        String emailAddress = jwtUtil.extractEmailFromToken(authToken.substring(7));
        User user = userRepository.findByEmail(emailAddress).orElseThrow(() ->
                new ResourceNotFoundException(EMAIL_NOT_FOUND + emailAddress));
 
-       Address address = userConverter.toAddressEntity(addressDto, user.getId());
+       Address address = userConverter.toAddressEntity(addressDtoRequest, user.getId());
        Address addressEntity = addressRepository.save(address);
-       return userConverter.toAddressDTO(addressEntity);
+       return userConverter.toAddressResponse(addressEntity);
    }
 
-   public PhoneDTO addPhoneForUser(String authToken, PhoneDTO phoneDto) {
+   public PhoneDTOResponse addPhoneForUser(String authToken, PhoneDTORequest phoneDtoRequest) {
        String emailAddress = jwtUtil.extractEmailFromToken(authToken.substring(7));
        User user = userRepository.findByEmail(emailAddress).orElseThrow(() ->
                new ResourceNotFoundException(EMAIL_NOT_FOUND + emailAddress));
 
-       Phone phone = userConverter.toPhoneEntity(phoneDto, user.getId());
+       Phone phone = userConverter.toPhoneEntity(phoneDtoRequest, user.getId());
        Phone phoneEntity = phoneRepository.save(phone);
-       return userConverter.toPhoneDTO(phoneEntity);
+       return userConverter.toPhoneResponse(phoneEntity);
    }
 }
 
