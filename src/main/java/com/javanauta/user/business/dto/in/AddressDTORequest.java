@@ -1,4 +1,4 @@
-package com.javanauta.user.business.dto;
+package com.javanauta.user.business.dto.in;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AddressDTO {
+public class AddressDTORequest {
 
     private Long id;
     private String street;
