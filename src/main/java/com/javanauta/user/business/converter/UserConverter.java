@@ -46,7 +46,9 @@ public class UserConverter {
     }
 
     public List<Phone> toPhoneEntityList(List<PhoneDTORequest> requests) {
-        return requests.stream().map(this::toPhoneEntity).toList();
+        return requests.stream()
+                .map(this::toPhoneEntity)
+                .toList();
     }
 
     public Phone toPhoneEntity(PhoneDTORequest request) {
@@ -58,8 +60,10 @@ public class UserConverter {
 
     public UserDTOResponse toUserResponse(User userEntity) {
         return UserDTOResponse.builder()
+                .id(userEntity.getId())
                 .name(userEntity.getName())
                 .email(userEntity.getEmail())
+                .password(userEntity.getPassword())
                 .addresses(userEntity.getAddresses() != null ?
                         toAddressResponseList(userEntity.getAddresses()) : null)
                 .phones(userEntity.getPhones() != null ?
@@ -73,6 +77,7 @@ public class UserConverter {
 
     public AddressDTOResponse toAddressResponse(Address addressEntity) {
         return AddressDTOResponse.builder()
+                .id(addressEntity.getId())
                 .street(addressEntity.getStreet())
                 .number(addressEntity.getNumber())
                 .city(addressEntity.getCity())
@@ -88,6 +93,7 @@ public class UserConverter {
 
     public PhoneDTOResponse toPhoneResponse(Phone phoneEntity) {
         return PhoneDTOResponse.builder()
+                .id(phoneEntity.getId())
                 .number(phoneEntity.getNumber())
                 .areaCode(phoneEntity.getAreaCode())
                 .build();
@@ -95,8 +101,8 @@ public class UserConverter {
 
     public User updateUser(UserDTORequest userDTORequest, User entity) {
         return User.builder()
-                .name(userDTORequest.getName() != null ? userDTORequest.getName() : entity.getName())
                 .id(entity.getId())
+                .name(userDTORequest.getName() != null ? userDTORequest.getName() : entity.getName())
                 .password(userDTORequest.getPassword() != null ? userDTORequest.getPassword() : entity.getPassword())
                 .email(userDTORequest.getEmail() != null ? userDTORequest.getEmail() : entity.getEmail())
                 .addresses(entity.getAddresses())
@@ -106,6 +112,7 @@ public class UserConverter {
 
     public Address updateAddress(AddressDTORequest addressDtoRequest, Address addressEntity) {
         return Address.builder()
+                .id(addressEntity.getId())
                 .street(addressDtoRequest.getStreet() != null ? addressDtoRequest.getStreet() : addressEntity.getStreet())
                 .number(addressDtoRequest.getNumber() != null ? addressDtoRequest.getNumber() : addressEntity.getNumber())
                 .city(addressDtoRequest.getCity() != null ? addressDtoRequest.getCity() : addressEntity.getCity())
