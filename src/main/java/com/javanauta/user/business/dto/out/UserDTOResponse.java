@@ -15,8 +15,10 @@ import java.util.List;
 @Builder
 public class UserDTOResponse {
 
+    private Long id;
     private String name;
     private String email;
+    private String password;
     private List<AddressDTOResponse> addresses;
     private List<PhoneDTOResponse> phones;
 }

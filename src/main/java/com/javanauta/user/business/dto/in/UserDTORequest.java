@@ -15,6 +15,7 @@ import java.util.List;
 @Builder
 public class UserDTORequest {
 
+    private Long id;
     private String name;
     private String email;
     private String password;
