@@ -14,6 +14,7 @@ import lombok.Setter;
 public class AddressDTOResponse {
 
 
+    private Long id;
     private String street;
     private Long number;
     private String complement;

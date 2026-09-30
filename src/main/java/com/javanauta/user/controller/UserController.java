@@ -46,7 +46,6 @@ public class UserController {
     public ResponseEntity<UserDTOResponse> createUser(@RequestBody UserDTORequest userDTORequest) {
 
         UserDTOResponse userDTOResponse = userService.createUser(userDTORequest);
-
         return ResponseEntity.
                 status(HttpStatus.CREATED)
                 .body(userDTOResponse);
@@ -79,6 +78,7 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteUserByEmail(@PathVariable String emailAddress) {
+
         userService.deleteUserByEmail(emailAddress);
         return ResponseEntity.ok().build();
     }
@@ -93,13 +93,9 @@ public class UserController {
                                                       @RequestHeader("Authorization") String authToken) {
 
         UserDTOResponse userDTOResponse = userService.updateUser(authToken, userDTORequest);
-
-
         return ResponseEntity.
                 status(HttpStatus.CREATED)
                 .body(userDTOResponse);
-
-
     }
 
     @Operation(summary = "Atualiza dados do endereço", description = "Atualiza dados do endereço do usuário através do ID")
@@ -111,9 +107,7 @@ public class UserController {
     public ResponseEntity<AddressDTOResponse> updateAddress(@RequestBody AddressDTORequest addressDTORequest,
                                                             @RequestParam("id") Long addressId) {
 
-
         AddressDTOResponse addressDTOResponse = userService.updateAddress(addressId, addressDTORequest);
-
         return ResponseEntity.
                 status(HttpStatus.CREATED)
                 .body(addressDTOResponse);
@@ -130,11 +124,9 @@ public class UserController {
                                                         @RequestParam("id") Long phoneId) {
 
         PhoneDTOResponse phoneDTOResponse = userService.updatePhone(phoneId, phoneDTORequest);
-
         return ResponseEntity.
                 status(HttpStatus.CREATED)
                 .body(phoneDTOResponse);
-
     }
 
     @Operation(summary = "Salvar endereço do usuário", description = "Cria um novo endereço")
@@ -144,11 +136,9 @@ public class UserController {
     public ResponseEntity<AddressDTOResponse> addAddress(@RequestBody AddressDTORequest addressDtoRequest,
                                                          @RequestHeader("Authorization") String authToken) {
       AddressDTOResponse addressDTOResponse = userService.addAddressForUser(authToken, addressDtoRequest);
-
       return ResponseEntity.
               status(HttpStatus.CREATED)
               .body(addressDTOResponse);
-
     }
 
     @Operation(summary = "Salvar telefone do usuário", description = "Cria um novo telefone")
