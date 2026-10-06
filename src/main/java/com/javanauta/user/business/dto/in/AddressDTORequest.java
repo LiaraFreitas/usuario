@@ -1,5 +1,4 @@
 package com.javanauta.user.business.dto.in;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,12 +12,14 @@ import lombok.Setter;
 @Builder
 public class AddressDTORequest {
 
-    private Long id;
+
     private String street;
     private Long number;
     private String complement;
     private String city;
     private String state;
     private String cep;
+
+
 }
 
