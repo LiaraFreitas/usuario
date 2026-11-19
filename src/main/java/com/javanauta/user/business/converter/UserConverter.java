@@ -21,10 +21,8 @@ public class UserConverter {
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(request.getPassword())
-                .addresses(request.getAddresses() != null ?
-                        toAddressEntityList(request.getAddresses()) : null)
-                .phones(request.getPhones() != null ?
-                        toPhoneEntityList(request.getPhones()) : null)
+                .addresses(toAddressEntityList(request.getAddresses()))
+                .phones(toPhoneEntityList(request.getPhones()))
                 .build();
     }
 

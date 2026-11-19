@@ -56,7 +56,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write(buildError(HttpStatus.UNAUTHORIZED.value(),
-                    "Token expirado",
+                    "Token expired",
                     e.getMessage()));
         }
     }
@@ -65,6 +65,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .message(message)
+                .status(status)
                 .error(error)
                 .build();
 

@@ -6,8 +6,8 @@ public class ConflictException extends RuntimeException {
         super(message);
     }
 
-    public ConflictException(String message, Throwable throwable) {
-        super(message, throwable);
+    public ConflictException(String mensagem, Throwable throwable) {
+        super(mensagem, throwable);
     }
 }
 

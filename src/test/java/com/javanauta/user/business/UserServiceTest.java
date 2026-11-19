@@ -1,43 +1,61 @@
 package com.javanauta.user.business;
 
 import com.javanauta.user.business.converter.UserConverter;
+import com.javanauta.user.business.dto.in.AddressDTORequest;
+import com.javanauta.user.business.dto.in.AddressDTORequestFixture;
+import com.javanauta.user.business.dto.in.PhoneDTORequest;
+import com.javanauta.user.business.dto.in.PhoneDTORequestFixture;
+import com.javanauta.user.business.dto.in.UserDTORequest;
+import com.javanauta.user.business.dto.in.UserDTORequestFixture;
+import com.javanauta.user.business.dto.out.AddressDTOResponse;
+import com.javanauta.user.business.dto.out.AddressDTOResponseFixture;
+import com.javanauta.user.business.dto.out.PhoneDTOResponse;
+import com.javanauta.user.business.dto.out.PhoneDTOResponseFixture;
 import com.javanauta.user.business.dto.out.UserDTOResponse;
+import com.javanauta.user.business.dto.out.UserDTOResponseFixture;
+import com.javanauta.user.infrastructure.entity.Address;
+import com.javanauta.user.infrastructure.entity.Phone;
 import com.javanauta.user.infrastructure.entity.User;
 import com.javanauta.user.infrastructure.exceptions.ConflictException;
+import com.javanauta.user.infrastructure.exceptions.ResourceNotFoundException;
+import com.javanauta.user.infrastructure.exceptions.UnauthorizedException;
 import com.javanauta.user.infrastructure.repository.AddressRepository;
 import com.javanauta.user.infrastructure.repository.PhoneRepository;
 import com.javanauta.user.infrastructure.repository.UserRepository;
 import com.javanauta.user.infrastructure.security.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
+import java.util.Optional;
+
+import static com.javanauta.user.business.UserService.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("UserService - createUser")
-class UserServiceTest {
+ class UserServiceTest {
+
+    @InjectMocks
+    private UserService userService;
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private UserConverter userConverter;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private AuthenticationManager authenticationManager;
 
     @Mock
     private AddressRepository addressRepository;
@@ -46,122 +64,651 @@ class UserServiceTest {
     private PhoneRepository phoneRepository;
 
     @Mock
+    private UserConverter userConverter;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
     private JwtUtil jwtUtil;
 
-    @InjectMocks
-    private UserService userService;
+    @Mock
+    private AuthenticationManager authenticationManager;
 
+    @Mock
+    private Authentication authentication;
+
+
+    private User userEntity;
+    private Address addressEntityOne;
+    private Address addressEntityTwo;
+    private Phone phoneEntityOne;
+    private Phone phoneEntityTwo;
+    private UserDTORequest userDTORequest;
+    private AddressDTORequest addressDTORequestOne;
+    private AddressDTORequest addressDTORequestTwo;
+    private PhoneDTORequest phoneDTORequestOne;
+    private PhoneDTORequest phoneDTORequestTwo;
     private UserDTOResponse userDTOResponse;
-    private User user;
-    private UserDTOResponse expectedUserDTOResponse;
+    private AddressDTOResponse addressDTOResponse;
+    private PhoneDTOResponse phoneDTOResponse;
+
+
 
     @BeforeEach
-    void setUp() {
-        userDTOResponse = UserDTOResponse.builder()
-                .name("João Silva")
-                .email("joao@example.com")
-                .password("senha123")
-                .build();
+     void setup() {
 
-        user = User.builder()
+ //================================ USER ENTITY =========================================
+        addressEntityOne = Address.builder()
                 .id(1L)
-                .name("João Silva")
-                .email("joao@example.com")
-                .password("encoded_password")
+                .userId(2L)
+                .street("Monte Belo")
+                .number(430L)
+                .city("Blumenau")
+                .cep("89060-072")
+                .state("SC")
+                .complement("Casa")
                 .build();
 
-        expectedUserDTOResponse = UserDTOResponse.builder()
-                .name("João Silva")
-                .email("joao@example.com")
-                .password("encoded_password")
+        phoneEntityOne = Phone.builder()
+                .number("992120528")
+                .areaCode("55")
                 .build();
+
+        addressEntityTwo = Address.builder()
+                .id(2L)
+                .userId(3L)
+                .street("Rua XV de Novembro")
+                .number(100L)
+                .city("Blumenau")
+                .cep("89060-010")
+                .state("SC")
+                .complement("Apartamento 101")
+                .build();
+
+        phoneEntityTwo = Phone.builder()
+                .number("981141827")
+                .areaCode("47")
+                .build();
+
+        userEntity = User.builder()
+                .name("User")
+                .email("user@gmail.com")
+                .password("1234")
+                .addresses(List.of(addressEntityOne, addressEntityTwo))
+                .phones(List.of(phoneEntityOne, phoneEntityTwo))
+                .build();
+
+
+ //====================== REQUEST ===============================
+
+
+        addressDTORequestOne = AddressDTORequestFixture
+                .build("Monte Belo",
+                        430L,
+                        "Casa",
+                        "Blumenau",
+                        "SC",
+                        "89060-072");
+
+        addressDTORequestTwo = AddressDTORequestFixture
+                .build("Rua XV de Novembro",
+                        100L,
+                        "Apartamento 101",
+                        "Blumenau",
+                        "SC",
+                        "89060-010");
+
+        phoneDTORequestOne = PhoneDTORequestFixture
+                .build("992120528",
+                        "55");
+
+        phoneDTORequestTwo = PhoneDTORequestFixture
+                .build("981141827",
+                        "47");
+
+
+        userDTORequest = UserDTORequestFixture
+                .build("User",
+                        "user@gmail.com",
+                        "1234",
+                        List.of(addressDTORequestOne, addressDTORequestTwo),
+                        List.of(phoneDTORequestOne, phoneDTORequestTwo));
+
+
+
+ //====================== RESPONSE ===============================
+        addressDTOResponse = AddressDTOResponseFixture
+                .build(1L,
+                        "Monte Belo",
+                        430L,
+                        "Casa",
+                        "Blumenau",
+                        "SC",
+                        "89060-072");
+
+        phoneDTOResponse = PhoneDTOResponseFixture
+                .build(1L,
+                        "992120528",
+                        "55");
+
+        userDTOResponse = UserDTOResponseFixture
+                .build(1L,
+                        "User",
+                        "user@gmail.com",
+                        passwordEncoder.toString(),
+                        List.of(addressDTOResponse),
+                        List.of(phoneDTOResponse));
+
+
     }
 
+
     @Test
-    @DisplayName("Deve criar um usuário com sucesso")
-    void testCreateUserSuccess() {
-        // Arrange
-        when(passwordEncoder.encode("senha123")).thenReturn("encoded_password");
-        when(userConverter.requestToEntityUser(userDTOResponse)).thenReturn(user);
-        when(userRepository.save(user)).thenReturn(user);
-        when(userConverter.toUserResponse(user)).thenReturn(expectedUserDTOResponse);
+    void createUserWithSuccess() {
 
-        // Act
-        UserDTOResponse result = userService.createUser(userDTOResponse);
+        //arrange - Preparar
 
-        // Assert
-        assertNotNull(result);
-        assertEquals("João Silva", result.getName());
-        assertEquals("joao@example.com", result.getEmail());
-        verify(passwordEncoder, times(1)).encode("senha123");
-        verify(userConverter, times(1)).requestToEntityUser(any(UserDTOResponse.class));
-        verify(userRepository, times(1)).save(user);
-        verify(userConverter, times(1)).toUserResponse(user);
+        String originalPassword = userDTORequest.getPassword();
+        String encodedPassword = userDTOResponse.getPassword();
+
+        userEntity.setPassword(encodedPassword);
+
+        when(passwordEncoder.encode(originalPassword))
+                .thenReturn(encodedPassword);
+
+        when(userConverter.toUserEntity(any(UserDTORequest.class)))
+                .thenReturn(userEntity);
+
+        when(userRepository.save(userEntity))
+                .thenReturn(userEntity);
+
+        when(userConverter.toUserResponse(userEntity))
+                .thenReturn(userDTOResponse);
+
+        //act - Executar
+
+        UserDTOResponse response = userService.createUser(userDTORequest);
+
+
+        //assert - verificar
+
+        assertNotNull(response);
+        assertEquals(response, userDTOResponse);
+
+        ArgumentCaptor<UserDTORequest> requestArgumentCaptor =
+                ArgumentCaptor.forClass(UserDTORequest.class);
+
+        ArgumentCaptor<User> userArgumentCaptor =
+                ArgumentCaptor.forClass(User.class);
+
+
+        InOrder inOrder = inOrder(passwordEncoder, userConverter, userRepository);
+
+        inOrder.verify(passwordEncoder).encode(originalPassword);
+        inOrder.verify(userConverter).toUserEntity(requestArgumentCaptor.capture());
+        inOrder.verify(userRepository).save(userArgumentCaptor.capture());
+        inOrder.verify(userConverter).toUserResponse(userEntity);
+
+
+        assertEquals(encodedPassword, requestArgumentCaptor.getValue().getPassword());
+        assertEquals(encodedPassword, userArgumentCaptor.getValue().getPassword());
+
     }
 
+
     @Test
-    @DisplayName("Deve lançar ConflictException quando email já está cadastrado")
-    void testCreateUserWithDuplicateEmail() {
-        // Arrange
-        when(passwordEncoder.encode("senha123")).thenReturn("encoded_password");
-        when(userConverter.requestToEntityUser(userDTOResponse)).thenReturn(user);
+    void createUserWithRegisteredEmailShouldThrowConflictException(){
 
-        DataIntegrityViolationException exception = new DataIntegrityViolationException(
-                "Unique constraint violation: email_unique"
-        );
-        when(userRepository.save(user)).thenThrow(exception);
+        when(userConverter.toUserEntity(any(UserDTORequest.class)))
+                .thenReturn(userEntity);
 
-        // Act & Assert
-        ConflictException conflictException = assertThrows(ConflictException.class, () -> {
-            userService.createUser(userDTOResponse);
+        when(userRepository.save(userEntity))
+                .thenThrow(new DataIntegrityViolationException("email_unique"));
+
+
+        ConflictException exception = assertThrows(ConflictException.class, () -> {
+            userService.createUser(userDTORequest);
         });
 
-        assertEquals("Email já cadastrado joao@example.com", conflictException.getMessage());
-        verify(passwordEncoder, times(1)).encode("senha123");
-        verify(userConverter, times(1)).requestToEntityUser(any(UserDTOResponse.class));
-        verify(userRepository, times(1)).save(user);
+        assertEquals(REGISTERED_EMAIL + userDTORequest.getEmail(), exception.getMessage());
+
     }
 
     @Test
-    @DisplayName("Deve relançar DataIntegrityViolationException quando não for relacionado a email")
-    void testCreateUserWithOtherDataIntegrityException() {
-        // Arrange
-        when(passwordEncoder.encode("senha123")).thenReturn("encoded_password");
-        when(userConverter.requestToEntityUser(userDTOResponse)).thenReturn(user);
+    void authenticateUserWithSuccess(){
 
-        DataIntegrityViolationException exception = new DataIntegrityViolationException(
-                "Some other constraint violation"
-        );
-        when(userRepository.save(user)).thenThrow(exception);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authentication);
 
-        // Act & Assert
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            userService.createUser(userDTOResponse);
+        when(authentication.getName())
+                .thenReturn(userDTORequest.getEmail());
+
+        when(jwtUtil.generateToken(userDTORequest.getEmail()))
+                .thenReturn("meu-token-jwt");
+
+        String response = userService.authenticateUser(userDTORequest);
+
+        assertEquals("Bearer meu-token-jwt", response);
+    }
+
+    @Test
+    void authenticateUserWhenUserDoesNotExist(){
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow( new UsernameNotFoundException(INVALID_USERNAME));
+
+
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
+                () -> userService.authenticateUser(userDTORequest));
+
+        assertEquals(INVALID_USERNAME, exception.getMessage());
+
+
+        verify(authenticationManager).authenticate(
+                any(UsernamePasswordAuthenticationToken.class));
+
+        verify(jwtUtil, never()).generateToken(anyString());
+
+
+    }
+
+    @Test
+    void authenticateUserWithInvalidPassword(){
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow( new BadCredentialsException(INVALID_USERNAME));
+
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
+                () -> userService.authenticateUser(userDTORequest));
+
+        assertEquals(INVALID_USERNAME, exception.getMessage());
+
+
+        verify(authenticationManager).authenticate(
+                any(UsernamePasswordAuthenticationToken.class));
+
+        verify(jwtUtil, never()).generateToken(anyString());
+
+    }
+
+    @Test
+    void authenticateUserWithInvalidCredentials(){
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow( new AuthorizationDeniedException(INVALID_USERNAME));
+
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
+                () -> userService.authenticateUser(userDTORequest));
+
+        assertEquals(INVALID_USERNAME, exception.getMessage());
+
+
+        verify(authenticationManager).authenticate(
+                any(UsernamePasswordAuthenticationToken.class));
+
+        verify(jwtUtil, never()).generateToken(anyString());
+
+    }
+
+    @Test
+    void findUserByEmailWithSuccess(){
+
+        String email = userEntity.getEmail();
+
+        when(userConverter.toUserResponse(userEntity))
+                .thenReturn(userDTOResponse);
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.of(userEntity));
+
+
+        UserDTOResponse response = userService.findUserByEmail(email);
+
+        assertEquals(userDTOResponse, response);
+
+        verify(userConverter).toUserResponse(userEntity);
+        verify(userRepository).findByEmail(email);
+
+    }
+
+    @Test
+    void findUserByEmailWhenUserDoesNotExist(){
+
+        String email = userEntity.getEmail();
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+           userService.findUserByEmail(email);
         });
 
-        verify(passwordEncoder, times(1)).encode("senha123");
-        verify(userConverter, times(1)).requestToEntityUser(any(UserDTOResponse.class));
-        verify(userRepository, times(1)).save(user);
+        assertEquals(EMAIL_NOT_FOUND + userEntity.getEmail(), exception.getMessage());
+    }
+
+
+    @Test
+    void deleteUserByEmailWithSuccess(){
+
+        String email = userEntity.getEmail();
+
+        doNothing().when(userRepository).deleteByEmail(email);
+
+        userService.deleteUserByEmail(email);
+
+        verify(userRepository).deleteByEmail(email);
+
+
+    }
+
+
+    @Test
+    void updateUserWithSucess(){
+
+        String authToken = "Bearer meu-token-jwt";
+        String email = userDTORequest.getEmail();
+
+
+        String originalPassword = userDTORequest.getPassword();
+        String encodedPassword = userDTOResponse.getPassword();
+
+        userEntity.setPassword(encodedPassword);
+
+        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+                .thenReturn(email);
+
+
+        when(passwordEncoder.encode(originalPassword))
+                .thenReturn(encodedPassword);
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.of(userEntity));
+
+        when(userConverter.updateUser(userDTORequest, userEntity))
+                .thenReturn(userEntity);
+
+        when(userRepository.save(userEntity))
+                .thenReturn(userEntity);
+
+        when(userConverter.toUserResponse(userEntity))
+                .thenReturn(userDTOResponse);
+
+
+        UserDTOResponse response = userService.updateUser(authToken, userDTORequest);
+
+        assertEquals(userDTOResponse, response);
+
+
+        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(passwordEncoder).encode(anyString());
+        verify(userRepository).findByEmail(email);
+        verify(userConverter).updateUser(userDTORequest, userEntity);
+        verify(userRepository).save(userEntity);
+        verify(userConverter).toUserResponse(userEntity);
+
+
     }
 
     @Test
-    @DisplayName("Deve codificar a senha do usuário antes de salvar")
-    void testCreateUserEncodesPassword() {
-        // Arrange
-        String rawPassword = "senha123";
-        String encodedPassword = "encoded_senha123";
+    void updateUserWhenUserDoesNotExist(){
 
-        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
-        when(userConverter.requestToEntityUser(userDTOResponse)).thenReturn(user);
-        when(userRepository.save(user)).thenReturn(user);
-        when(userConverter.toUserResponse(user)).thenReturn(expectedUserDTOResponse);
+        String authToken = "Bearer meu-token-jwt";
+        String email = userDTORequest.getEmail();
 
-        // Act
-        userService.createUser(userDTOResponse);
 
-        // Assert
-        verify(passwordEncoder, times(1)).encode(rawPassword);
-        assertEquals(encodedPassword, userDTOResponse.getPassword());
+        String originalPassword = userDTORequest.getPassword();
+        String encodedPassword = userDTOResponse.getPassword();
+
+        userEntity.setPassword(encodedPassword);
+
+        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+                .thenReturn(email);
+
+
+        when(passwordEncoder.encode(originalPassword))
+                .thenReturn(encodedPassword);
+
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            userService.updateUser(authToken, userDTORequest);
+        });
+
+        assertEquals(EMAIL_NOT_FOUND, exception.getMessage());
+
+        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(userRepository).findByEmail(email);
+
+        verify(userConverter, never()).updateUser(any(), any());
+        verify(userRepository, never()).save(any(User.class));
+        verify(userConverter, never()).toUserResponse(any());
     }
+
+    @Test
+    void updateAddressWithSucess(){
+        Long addressID = addressEntityOne.getId();
+
+        when(addressRepository.findById(addressID))
+                .thenReturn(Optional.of(addressEntityOne));
+
+        when(addressRepository.save(addressEntityOne))
+                .thenReturn(addressEntityOne);
+
+        when(userConverter.toAddressResponse(addressEntityOne))
+                .thenReturn(addressDTOResponse);
+
+        when(userConverter.updateAddress(addressDTORequestOne, addressEntityOne))
+                .thenReturn(addressEntityOne);
+
+        AddressDTOResponse response = userService.updateAddress(addressID, addressDTORequestOne);
+
+        assertEquals(addressDTOResponse, response);
+
+        verify(addressRepository).findById(addressID);
+        verify(addressRepository).save(addressEntityOne);
+        verify(userConverter).toAddressResponse(addressEntityOne);
+
+    }
+
+    @Test
+    void updateAddressWhenIdNotFound(){
+
+        Long addressID = addressEntityOne.getId();
+
+        when(addressRepository.findById(addressID))
+                .thenReturn(Optional.empty());
+
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () ->
+                userService.updateAddress(addressID, addressDTORequestOne));
+
+        assertEquals(ID_NOT_FOUND + addressID, exception.getMessage());
+
+
+    }
+
+    @Test
+    void updatePhoneWithSucess(){
+        Long phoneID = phoneEntityOne.getId();
+
+        when(phoneRepository.findById(phoneID))
+                .thenReturn(Optional.of(phoneEntityOne));
+
+        when(phoneRepository.save(phoneEntityOne))
+                .thenReturn(phoneEntityOne);
+
+        when(userConverter.toPhoneResponse(phoneEntityOne))
+                .thenReturn(phoneDTOResponse);
+
+        when(userConverter.updatePhone(phoneDTORequestOne, phoneEntityOne))
+                .thenReturn(phoneEntityOne);
+
+        PhoneDTOResponse response = userService.updatePhone(phoneID, phoneDTORequestOne);
+
+        assertEquals(phoneDTOResponse, response);
+
+        verify(phoneRepository).findById(phoneID);
+        verify(phoneRepository).save(phoneEntityOne);
+        verify(userConverter).toPhoneResponse(phoneEntityOne);
+
+    }
+
+    @Test
+    void updatePhoneWhenIdNotFound(){
+        Long phoneID = phoneEntityOne.getId();
+
+        when(phoneRepository.findById(phoneID))
+                .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () ->
+                userService.updatePhone(phoneID, phoneDTORequestOne));
+
+
+        assertEquals(ID_NOT_FOUND + phoneID, exception.getMessage());
+
+    }
+
+    @Test
+    void addAddressForUserWithSucess(){
+
+        String authToken = "Bearer meu-token-jwt";
+        String email = userDTORequest.getEmail();
+
+
+
+        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+                .thenReturn(email);
+
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.of(userEntity));
+
+        when(userConverter.toAddressEntity(addressDTORequestOne, userEntity.getId()))
+                .thenReturn(addressEntityOne);
+
+        when(addressRepository.save(addressEntityOne))
+                .thenReturn(addressEntityOne);
+
+        when(userConverter.toAddressResponse(addressEntityOne))
+                .thenReturn(addressDTOResponse);
+
+        AddressDTOResponse response = userService.addAddressForUser(authToken, addressDTORequestOne);
+
+
+        assertEquals(addressDTOResponse, response);
+
+        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(userRepository).findByEmail(email);
+        verify(userConverter).toAddressEntity(addressDTORequestOne, userEntity.getId());
+        verify(addressRepository).save(addressEntityOne);
+        verify(userConverter).toAddressResponse(addressEntityOne);
+
+    }
+
+    @Test
+    void addAddressWhenUserNotFound(){
+        String authToken = "Bearer meu-token-jwt";
+        String email = userDTORequest.getEmail();
+
+
+        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+                .thenReturn(email);
+
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            userService.addAddressForUser(authToken, addressDTORequestOne);
+        });
+
+        assertEquals(EMAIL_NOT_FOUND + email, exception.getMessage());
+
+        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(userRepository).findByEmail(email);
+        verify(userConverter, never()).toAddressEntity(any(AddressDTORequest.class), anyLong());
+        verify(addressRepository, never()).save(any(Address.class));
+        verify(userConverter, never()).toAddressResponse(any(Address.class));
+
+    }
+
+    @Test
+    void addPhoneForUserWithSucess(){
+
+
+        String authToken = "Bearer meu-token-jwt";
+        String email = userDTORequest.getEmail();
+
+
+
+        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+                .thenReturn(email);
+
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.of(userEntity));
+
+        when(userConverter.toPhoneEntity(phoneDTORequestOne, userEntity.getId()))
+                .thenReturn(phoneEntityOne);
+
+        when(phoneRepository.save(phoneEntityOne))
+                .thenReturn(phoneEntityOne);
+
+        when(userConverter.toPhoneResponse(phoneEntityOne))
+                .thenReturn(phoneDTOResponse);
+
+        PhoneDTOResponse response = userService.addPhoneForUser(authToken, phoneDTORequestOne);
+
+
+        assertEquals(phoneDTOResponse, response);
+
+        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(userRepository).findByEmail(email);
+        verify(userConverter).toPhoneEntity(phoneDTORequestOne, userEntity.getId());
+        verify(phoneRepository).save(phoneEntityOne);
+        verify(userConverter).toPhoneResponse(phoneEntityOne);
+
+
+    }
+
+    @Test
+    void addPhoneWhenUserNotFound(){
+        String authToken = "Bearer meu-token-jwt";
+        String email = userDTORequest.getEmail();
+
+
+        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+                .thenReturn(email);
+
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            userService.addPhoneForUser(authToken, phoneDTORequestOne);
+        });
+
+        assertEquals(EMAIL_NOT_FOUND + email, exception.getMessage());
+
+        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(userRepository).findByEmail(email);
+        verify(userConverter, never()).toPhoneEntity(any(PhoneDTORequest.class), anyLong());
+        verify(phoneRepository, never()).save(any(Phone.class));
+        verify(userConverter, never()).toPhoneResponse(any(Phone.class));
+
+
+    }
+
+
+
+
 }
+
+
 

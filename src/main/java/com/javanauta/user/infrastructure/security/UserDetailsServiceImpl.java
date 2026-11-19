@@ -11,16 +11,21 @@ import org.springframework.stereotype.Service;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     // Repositório para acessar dados de usuário no banco de dados
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    // Implementação do método para carregar detalhes do usuário pelo e-mail
+    @Autowired
+    public UserDetailsServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+
+    // Implementação do metodo para carregar detalhes do usuário pelo e-mail
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         // Busca o usuário no banco de dados pelo e-mail
         User user = userRepository.findByEmail(email)
                 //Optional declarado na UsuarioRepository permite criar esta exceção
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
         // Cria e retorna um objeto UserDetails com base no usuário encontrado
         return org.springframework.security.core.userdetails.User

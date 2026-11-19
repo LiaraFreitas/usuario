@@ -2,7 +2,7 @@ package com.javanauta.user.business;
 
 import com.javanauta.user.infrastructure.clients.ViaCepClient;
 import com.javanauta.user.infrastructure.clients.ViaCepDTO;
-import com.javanauta.user.infrastructure.exceptions.IllegalArgumentException;
+import com.javanauta.user.infrastructure.exceptions.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class ViaCepService {
         String formattedPostalCode = postalCode.replace(" ", "").replace("-", "");
 
         if (!formattedPostalCode.matches("\\d+") || !Objects.equals(formattedPostalCode.length(), 8)) {
-            throw new IllegalArgumentException("O CEP contém caracteres inválidos, por favor verificar");
+            throw new InvalidRequestException("O CEP contém caracteres inválidos, por favor verificar");
         }
         return formattedPostalCode;
     }

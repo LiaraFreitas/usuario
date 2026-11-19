@@ -2,6 +2,7 @@ package com.javanauta.user.infrastructure.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Base64;
@@ -11,7 +12,11 @@ import java.util.Date;
 public class JwtUtil {
 
     // Chave secreta usada para assinar e verificar tokens JWT
-    private static final String secretKey = "c3VhLWNoYXZlLXNlY3JldGEtc3VwZXItc2VndXJhLXF1ZS1kZXZlLXNlci1iZW0tbG9uZ2E=";
+    private  final String secretKey;
+
+    public JwtUtil(@Value("${jwt.secret}") String secretKey) {
+        this.secretKey = secretKey;
+    }
 
     private SecretKey getSecretKey() {
         byte[] key = Base64.getDecoder().decode(secretKey);
