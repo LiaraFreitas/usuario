@@ -3,7 +3,8 @@ package com.javanauta.user.business.dto.in;
 
 public class AddressDTORequestFixture {
 
-    public static AddressDTORequest build(String street,
+    public static AddressDTORequest build(
+                                          String street,
                                           Long number,
                                           String complement,
                                           String city,

@@ -1,6 +1,4 @@
 package com.javanauta.user.business;
-
-
 import com.javanauta.user.business.converter.UserConverter;
 import com.javanauta.user.business.dto.in.AddressDTORequest;
 import com.javanauta.user.business.dto.in.PhoneDTORequest;
@@ -43,8 +41,8 @@ public class UserService {
    private final AuthenticationManager authenticationManager;
 
    public static final String REGISTERED_EMAIL = "Email já cadastrado ";
-   public static final String EMAIL_NOT_FOUND = "Email não encontrado";
-   public static final String ID_NOT_FOUND = "ID não encontrado";
+   public static final String EMAIL_NOT_FOUND = "Email não encontrado ";
+   public static final String ID_NOT_FOUND = "ID não encontrado ";
    public static final String INVALID_USERNAME = "Usuário ou senha inválida: ";
 
    @Transactional
@@ -76,17 +74,14 @@ public class UserService {
    }
 
    public UserDTOResponse findUserByEmail(String emailAddress) {
-       try {
            return userConverter.toUserResponse(
                    userRepository.findByEmail(emailAddress)
-                           .orElseThrow(() -> new ResourceNotFoundException(EMAIL_NOT_FOUND + emailAddress))
+                           .orElseThrow(() -> new ResourceNotFoundException(
+                                   EMAIL_NOT_FOUND + emailAddress))
            );
-       } catch (ResourceNotFoundException e) {
-           throw new ResourceNotFoundException(EMAIL_NOT_FOUND + emailAddress);
-       }
    }
 
-   public void deleteUserByEmail(String emailAddress) {
+   public void deleteUserByEmail(String emailAddress){
        userRepository.deleteByEmail(emailAddress);
    }
 

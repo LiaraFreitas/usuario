@@ -21,11 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
-public class UserConverterTest {
+ class UserConverterTest {
 
     @InjectMocks
     private UserConverter userConverter;
-    private User user;
+    private User userEntity;
     private Address addressEntityOne;
     private Address addressEntityTwo;
     private Phone phoneEntityOne;
@@ -42,9 +42,16 @@ public class UserConverterTest {
     private PhoneDTORequest phoneDTORequestOne;
     private PhoneDTORequest phoneDTORequestTwo;
     private PhoneDTORequest phoneDTORequestThree;
+    private PhoneDTORequest updatePhoneDTORequest;
+    private PhoneDTORequest updatePhoneWithNulls;
+
+
 
     @BeforeEach
-    public void setup() {
+     void setup() {
+
+    //================================ USER ENTITY =========================================
+
         addressEntityOne = Address.builder()
                 .id(1L)
                 .userId(2L)
@@ -78,7 +85,7 @@ public class UserConverterTest {
                 .build();
 
 
-        user = User.builder()
+        userEntity = User.builder()
                 .name("User")
                 .email("user@gmail.com")
                 .password("1234")
@@ -86,6 +93,7 @@ public class UserConverterTest {
                 .phones(List.of(phoneEntityOne, phoneEntityTwo))
                 .build();
 
+//====================== REQUEST ===============================
 
         addressDTORequestOne = AddressDTORequestFixture
                 .build("Monte Belo",
@@ -140,6 +148,14 @@ public class UserConverterTest {
                 .build("991191523",
                         "35");
 
+        updatePhoneDTORequest = PhoneDTORequestFixture
+                .build(null,
+                        "46");
+
+        updatePhoneWithNulls = PhoneDTORequestFixture
+                .build(null,
+                        null);
+
         userDTORequest = UserDTORequestFixture
                 .build("User",
                         "user@gmail.com",
@@ -173,18 +189,17 @@ public class UserConverterTest {
 
     }
 
-    // ======================== TEST: toUserEntity ========================
 
     @Test
     void testConvertToUserEntity() {
 
-        User userEntity = userConverter.toUserEntity(userDTORequest);
+        User user = userConverter.toUserEntity(userDTORequest);
 
-        assertEquals(user.getName(), userEntity.getName());
-        assertEquals(user.getEmail(), userEntity.getEmail());
-        assertEquals(user.getPassword(), userEntity.getPassword());
-        assertEquals(2, userEntity.getAddresses().size());
-        assertEquals(2, userEntity.getPhones().size());
+        assertEquals(userDTORequest.getName(), user.getName(), "User name must be converted correctly");
+        assertEquals(userDTORequest.getEmail(), user.getEmail(), "User email must be converted correctly");
+        assertEquals(userDTORequest.getPassword(), user.getPassword(), "User password must be converted correctly");
+        assertEquals(2, user.getAddresses().size(), "Address list must contain 2 items");
+        assertEquals(2, user.getPhones().size(), "Phone list must contain 2 items");
     }
 
     @Test
@@ -192,12 +207,12 @@ public class UserConverterTest {
 
         Address address = userConverter.toAddressEntity(addressDTORequestOne);
 
-        assertEquals(addressDTORequestOne.getStreet(), address.getStreet());
-        assertEquals(addressDTORequestOne.getNumber(), address.getNumber());
-        assertEquals(addressDTORequestOne.getCity(), address.getCity());
-        assertEquals(addressDTORequestOne.getState(), address.getState());
-        assertEquals(addressDTORequestOne.getCep(), address.getCep());
-        assertEquals(addressDTORequestOne.getComplement(), address.getComplement());
+        assertEquals(addressDTORequestOne.getStreet(), address.getStreet(), "Address street must be converted correctly");
+        assertEquals(addressDTORequestOne.getNumber(), address.getNumber(), "Address number must be converted correctly");
+        assertEquals(addressDTORequestOne.getCity(), address.getCity(), "Address city must be converted correctly");
+        assertEquals(addressDTORequestOne.getState(), address.getState(), "Address state must be converted correctly");
+        assertEquals(addressDTORequestOne.getCep(), address.getCep(), "Address ZIP code must be converted correctly");
+        assertEquals(addressDTORequestOne.getComplement(), address.getComplement(), "Address complement must be converted correctly");
     }
 
     @Test
@@ -208,13 +223,13 @@ public class UserConverterTest {
                 addressDTORequestTwo);
 
         List<Address> addresses = userConverter.toAddressEntityList(requests);
-        assertEquals(2, addresses.size());
+        assertEquals(2, addresses.size(), "Address list must contain 2 items");
 
-        assertEquals(addressDTORequestOne.getStreet(), addresses.get(0).getStreet());
-        assertEquals(addressDTORequestOne.getNumber(), addresses.get(0).getNumber());
+        assertEquals(addressDTORequestOne.getStreet(), addresses.get(0).getStreet(), "The first address must keep the correct street");
+        assertEquals(addressDTORequestOne.getNumber(), addresses.get(0).getNumber(), "The first address must keep the correct number");
 
-        assertEquals(addressDTORequestTwo.getStreet(), addresses.get(1).getStreet());
-        assertEquals(addressDTORequestTwo.getNumber(), addresses.get(1).getNumber());
+        assertEquals(addressDTORequestTwo.getStreet(), addresses.get(1).getStreet(), "The second address must keep the correct street");
+        assertEquals(addressDTORequestTwo.getNumber(), addresses.get(1).getNumber(), "The second address must keep the correct number");
     }
 
     @Test
@@ -222,8 +237,8 @@ public class UserConverterTest {
 
         Phone phone = userConverter.toPhoneEntity(phoneDTORequestOne);
 
-        assertEquals(phoneDTORequestOne.getNumber(), phone.getNumber());
-        assertEquals(phoneDTORequestOne.getAreaCode(), phone.getAreaCode());
+        assertEquals(phoneDTORequestOne.getNumber(), phone.getNumber(), "Phone number must be converted correctly");
+        assertEquals(phoneDTORequestOne.getAreaCode(), phone.getAreaCode(), "Phone area code must be converted correctly");
     }
 
     @Test
@@ -234,13 +249,13 @@ public class UserConverterTest {
                 phoneDTORequestTwo);
 
         List<Phone> phones = userConverter.toPhoneEntityList(requests);
-        assertEquals(2, phones.size());
+        assertEquals(2, phones.size(), "Phone list must contain 2 items");
 
-        assertEquals(phoneDTORequestOne.getNumber(), phones.get(0).getNumber());
-        assertEquals(phoneDTORequestOne.getAreaCode(), phones.get(0).getAreaCode());
+        assertEquals(phoneDTORequestOne.getNumber(), phones.get(0).getNumber(), "The first phone must keep the correct number");
+        assertEquals(phoneDTORequestOne.getAreaCode(), phones.get(0).getAreaCode(), "The first phone must keep the correct area code");
 
-        assertEquals(phoneDTORequestTwo.getNumber(), phones.get(1).getNumber());
-        assertEquals(phoneDTORequestTwo.getAreaCode(), phones.get(1).getAreaCode());
+        assertEquals(phoneDTORequestTwo.getNumber(), phones.get(1).getNumber(), "The second phone must keep the correct number");
+        assertEquals(phoneDTORequestTwo.getAreaCode(), phones.get(1).getAreaCode(), "The second phone must keep the correct area code");
     }
 
     // ======================== TEST: toUserResponse ========================
@@ -248,26 +263,26 @@ public class UserConverterTest {
     @Test
     void testConvertToUserResponse() {
 
-        UserDTOResponse response = userConverter.toUserResponse(user);
+        UserDTOResponse response = userConverter.toUserResponse(userEntity);
 
-        assertEquals(user.getName(), response.getName());
-        assertEquals(user.getEmail(), response.getEmail());
-        assertEquals(user.getPassword(), response.getPassword());
+        assertEquals(userEntity.getName(), response.getName(), "Response name must match the user");
+        assertEquals(userEntity.getEmail(), response.getEmail(), "Response email must match the user");
+        assertEquals(userEntity.getPassword(), response.getPassword(), "Response password must match the user");
 
-        assertEquals(2, response.getAddresses().size());
-        assertEquals(2, response.getPhones().size());
+        assertEquals(2, response.getAddresses().size(), "Response address list must contain 2 items");
+        assertEquals(2, response.getPhones().size(), "Response phone list must contain 2 items");
     }
 
     @Test
     void testConvertToUserResponseWithNullLists() {
 
-        user.setAddresses(null);
-        user.setPhones(null);
+        userEntity.setAddresses(null);
+        userEntity.setPhones(null);
 
-        UserDTOResponse response = userConverter.toUserResponse(user);
+        UserDTOResponse response = userConverter.toUserResponse(userEntity);
 
-        assertNull(response.getAddresses());
-        assertNull(response.getPhones());
+        assertNull(response.getAddresses(), "Address list must remain null");
+        assertNull(response.getPhones(), "Phone list must remain null");
     }
 
     @Test
@@ -275,12 +290,12 @@ public class UserConverterTest {
 
         AddressDTOResponse response = userConverter.toAddressResponse(addressEntityOne);
 
-        assertEquals(addressEntityOne.getStreet(), response.getStreet());
-        assertEquals(addressEntityOne.getNumber(), response.getNumber());
-        assertEquals(addressEntityOne.getCity(), response.getCity());
-        assertEquals(addressEntityOne.getState(), response.getState());
-        assertEquals(addressEntityOne.getCep(), response.getCep());
-        assertEquals(addressEntityOne.getComplement(), response.getComplement());
+        assertEquals(addressEntityOne.getStreet(), response.getStreet(), "Response street must match the entity");
+        assertEquals(addressEntityOne.getNumber(), response.getNumber(), "Response number must match the entity");
+        assertEquals(addressEntityOne.getCity(), response.getCity(), "Response city must match the entity");
+        assertEquals(addressEntityOne.getState(), response.getState(), "Response state must match the entity");
+        assertEquals(addressEntityOne.getCep(), response.getCep(), "Response ZIP code must match the entity");
+        assertEquals(addressEntityOne.getComplement(), response.getComplement(), "Response complement must match the entity");
     }
 
     @Test
@@ -291,13 +306,13 @@ public class UserConverterTest {
                 addressEntityTwo);
 
         List<AddressDTOResponse> addressesResponses = userConverter.toAddressResponseList(responses);
-        assertEquals(2, addressesResponses.size());
+        assertEquals(2, addressesResponses.size(), "Address response list must contain 2 items");
 
-        assertEquals(addressEntityOne.getStreet(), addressesResponses.get(0).getStreet());
-        assertEquals(addressEntityOne.getNumber(), addressesResponses.get(0).getNumber());
+        assertEquals(addressEntityOne.getStreet(), addressesResponses.get(0).getStreet(), "The first address response must keep the correct street");
+        assertEquals(addressEntityOne.getNumber(), addressesResponses.get(0).getNumber(), "The first address response must keep the correct number");
 
-        assertEquals(addressEntityTwo.getStreet(), addressesResponses.get(1).getStreet());
-        assertEquals(addressEntityTwo.getNumber(), addressesResponses.get(1).getNumber());
+        assertEquals(addressEntityTwo.getStreet(), addressesResponses.get(1).getStreet(), "The second address response must keep the correct street");
+        assertEquals(addressEntityTwo.getNumber(), addressesResponses.get(1).getNumber(), "The second address response must keep the correct number");
     }
 
     @Test
@@ -305,8 +320,8 @@ public class UserConverterTest {
 
         PhoneDTOResponse response = userConverter.toPhoneResponse(phoneEntityOne);
 
-        assertEquals(phoneEntityOne.getNumber(), response.getNumber());
-        assertEquals(phoneEntityOne.getAreaCode(), response.getAreaCode());
+        assertEquals(phoneEntityOne.getNumber(), response.getNumber(), "Response phone number must match the entity");
+        assertEquals(phoneEntityOne.getAreaCode(), response.getAreaCode(), "Response phone area code must match the entity");
 
     }
 
@@ -318,42 +333,42 @@ public class UserConverterTest {
                 phoneEntityTwo);
 
         List<PhoneDTOResponse> phonesResponses = userConverter.toPhoneResponseList(responses);
-        assertEquals(2, phonesResponses.size());
+        assertEquals(2, phonesResponses.size(), "Phone response list must contain 2 items");
 
-        assertEquals(phoneEntityOne.getNumber(), phonesResponses.get(0).getNumber());
-        assertEquals(phoneEntityOne.getAreaCode(), phonesResponses.get(0).getAreaCode());
+        assertEquals(phoneEntityOne.getNumber(), phonesResponses.get(0).getNumber(), "The first phone response must keep the correct number");
+        assertEquals(phoneEntityOne.getAreaCode(), phonesResponses.get(0).getAreaCode(), "The first phone response must keep the correct area code");
 
-        assertEquals(phoneEntityTwo.getNumber(), phonesResponses.get(1).getNumber());
-        assertEquals(phoneEntityTwo.getAreaCode(), phonesResponses.get(1).getAreaCode());
+        assertEquals(phoneEntityTwo.getNumber(), phonesResponses.get(1).getNumber(), "The second phone response must keep the correct number");
+        assertEquals(phoneEntityTwo.getAreaCode(), phonesResponses.get(1).getAreaCode(), "The second phone response must keep the correct area code");
     }
 
     @Test
     void testUpdateUser() {
 
-        User updateUser = userConverter.updateUser(updateUserDTORequest, user);
+        User updateUser = userConverter.updateUser(updateUserDTORequest, userEntity);
 
-        assertEquals(updateUserDTORequest.getName(), updateUser.getName());
-        assertEquals(updateUserDTORequest.getEmail(), updateUser.getEmail());
-        assertEquals(updateUserDTORequest.getPassword(), updateUser.getPassword());
+        assertEquals(updateUserDTORequest.getName(), updateUser.getName(), "Updated name must be kept correctly");
+        assertEquals(updateUserDTORequest.getEmail(), updateUser.getEmail(), "Updated email must be kept correctly");
+        assertEquals(updateUserDTORequest.getPassword(), updateUser.getPassword(), "Updated password must be kept correctly");
     }
 
     @Test
     void testUpdateUserKeepsEntityAddressesAndPhones() {
 
-        User updateUser = userConverter.updateUser(updateUserWithoutChangingAddressAndPhone, user);
+        User updateUser = userConverter.updateUser(updateUserWithoutChangingAddressAndPhone, userEntity);
 
-        assertEquals(user.getAddresses(), updateUser.getAddresses());
-        assertEquals(user.getPhones(), updateUser.getPhones());
+        assertEquals(userEntity.getAddresses(), updateUser.getAddresses(), "Old addresses must be preserved when not changed");
+        assertEquals(userEntity.getPhones(), updateUser.getPhones(), "Old phones must be preserved when not changed");
     }
 
     @Test
     void testUpdateUserKeepsOldValuesWhenRequestFieldsAreNull() {
 
-        User updateUser = userConverter.updateUser(updateUserWithNulls, user);
+        User updateUser = userConverter.updateUser(updateUserWithNulls, userEntity);
 
-        assertEquals(user.getName(), updateUser.getName());
-        assertEquals(user.getEmail(), updateUser.getEmail());
-        assertEquals(user.getPassword(), updateUser.getPassword());
+        assertEquals(userEntity.getName(), updateUser.getName(), "Old name must be kept when the request is null");
+        assertEquals(userEntity.getEmail(), updateUser.getEmail(), "Old email must be kept when the request is null");
+        assertEquals(userEntity.getPassword(), updateUser.getPassword(), "Old password must be kept when the request is null");
 
 
     }
@@ -363,15 +378,15 @@ public class UserConverterTest {
 
         Address updateAddress = userConverter.updateAddress(addressDTORequestThree, addressEntityOne);
 
-        assertEquals(addressEntityOne.getId(), updateAddress.getId());
-        assertEquals(addressEntityOne.getUserId(), updateAddress.getUserId());
+        assertEquals(addressEntityOne.getId(), updateAddress.getId(), "Address ID must be preserved");
+        assertEquals(addressEntityOne.getUserId(), updateAddress.getUserId(), "Address user ID must be preserved");
 
-        assertEquals(addressDTORequestThree.getStreet(), updateAddress.getStreet());
-        assertEquals(addressDTORequestThree.getNumber(), updateAddress.getNumber());
-        assertEquals(addressDTORequestThree.getComplement(), updateAddress.getComplement());
-        assertEquals(addressDTORequestThree.getCity(), updateAddress.getCity());
-        assertEquals(addressDTORequestThree.getState(), updateAddress.getState());
-        assertEquals(addressDTORequestThree.getCep(), updateAddress.getCep());
+        assertEquals(addressDTORequestThree.getStreet(), updateAddress.getStreet(), "Address street must be updated correctly");
+        assertEquals(addressDTORequestThree.getNumber(), updateAddress.getNumber(), "Address number must be updated correctly");
+        assertEquals(addressDTORequestThree.getComplement(), updateAddress.getComplement(), "Address complement must be updated correctly");
+        assertEquals(addressDTORequestThree.getCity(), updateAddress.getCity(), "Address city must be updated correctly");
+        assertEquals(addressDTORequestThree.getState(), updateAddress.getState(), "Address state must be updated correctly");
+        assertEquals(addressDTORequestThree.getCep(), updateAddress.getCep(), "Address ZIP code must be updated correctly");
     }
 
     @Test
@@ -379,16 +394,16 @@ public class UserConverterTest {
 
         Address updateAddress = userConverter.updateAddress(updateAddresesDTORequest,addressEntityOne);
 
-        assertEquals(addressEntityOne.getId(), updateAddress.getId());
-        assertEquals(addressEntityOne.getUserId(), updateAddress.getUserId());
+        assertEquals(addressEntityOne.getId(), updateAddress.getId(), "Address ID must be preserved during partial update");
+        assertEquals(addressEntityOne.getUserId(), updateAddress.getUserId(), "Address user ID must be preserved during partial update");
 
-        assertEquals(updateAddresesDTORequest.getStreet(), updateAddress.getStreet());
-        assertEquals(updateAddresesDTORequest.getNumber(), updateAddress.getNumber());
-        assertEquals(updateAddresesDTORequest.getComplement(), updateAddress.getComplement());
+        assertEquals(updateAddresesDTORequest.getStreet(), updateAddress.getStreet(), "Address street must be updated partially");
+        assertEquals(updateAddresesDTORequest.getNumber(), updateAddress.getNumber(), "Address number must be updated partially");
+        assertEquals(updateAddresesDTORequest.getComplement(), updateAddress.getComplement(), "Address complement must be updated partially");
 
-        assertEquals(addressEntityOne.getCity(), updateAddress.getCity());
-        assertEquals(addressEntityOne.getState(), updateAddress.getState());
-        assertEquals(addressEntityOne.getCep(), updateAddress.getCep());
+        assertEquals(addressEntityOne.getCity(), updateAddress.getCity(), "Address city must keep the previous value when not provided");
+        assertEquals(addressEntityOne.getState(), updateAddress.getState(), "Address state must keep the previous value when not provided");
+        assertEquals(addressEntityOne.getCep(), updateAddress.getCep(), "Address ZIP code must keep the previous value when not provided");
 
     }
 
@@ -397,387 +412,62 @@ public class UserConverterTest {
 
         Address updateAddress = userConverter.updateAddress(updateAddresesWithNulls, addressEntityTwo);
 
-        assertEquals(addressEntityTwo.getId(), updateAddress.getId());
-        assertEquals(addressEntityTwo.getUserId(), updateAddress.getUserId());
+        assertEquals(addressEntityTwo.getId(), updateAddress.getId(), "Address ID must be preserved when the request is null");
+        assertEquals(addressEntityTwo.getUserId(), updateAddress.getUserId(), "Address user ID must be preserved when the request is null");
 
-        assertEquals(addressEntityTwo.getStreet(), updateAddress.getStreet());
-        assertEquals(addressEntityTwo.getNumber(), updateAddress.getNumber());
-        assertEquals(addressEntityTwo.getComplement(), updateAddress.getComplement());
-        assertEquals(addressEntityTwo.getCity(), updateAddress.getCity());
-        assertEquals(addressEntityTwo.getState(), updateAddress.getState());
-        assertEquals(addressEntityTwo.getCep(), updateAddress.getCep());
+        assertEquals(addressEntityTwo.getStreet(), updateAddress.getStreet(), "Address street must remain unchanged when the request is null");
+        assertEquals(addressEntityTwo.getNumber(), updateAddress.getNumber(), "Address number must remain unchanged when the request is null");
+        assertEquals(addressEntityTwo.getComplement(), updateAddress.getComplement(), "Address complement must remain unchanged when the request is null");
+        assertEquals(addressEntityTwo.getCity(), updateAddress.getCity(), "Address city must remain unchanged when the request is null");
+        assertEquals(addressEntityTwo.getState(), updateAddress.getState(), "Address state must remain unchanged when the request is null");
+        assertEquals(addressEntityTwo.getCep(), updateAddress.getCep(), "Address ZIP code must remain unchanged when the request is null");
 
+
+    }
+
+
+    @Test
+    void testUpdatePhone() {
+
+        Phone updatePhone = userConverter.updatePhone(phoneDTORequestTwo, phoneEntityTwo);
+
+        assertEquals(phoneEntityTwo.getId(), updatePhone.getId(), "Phone ID must be preserved");
+        assertEquals(phoneEntityTwo.getUserId(), updatePhone.getUserId(), "Phone user ID must be preserved");
+
+        assertEquals(phoneDTORequestTwo.getAreaCode(), updatePhone.getAreaCode(), "Phone areacode must be updated correctly");
+        assertEquals(phoneDTORequestTwo.getNumber(), updatePhone.getNumber(), "Phone number must be updated correctly");
+
+
+    }
+
+    @Test
+    void testUpdatePhonePartially() {
+
+        Phone updatePhone = userConverter.updatePhone(updatePhoneDTORequest, phoneEntityOne);
+
+        assertEquals(phoneEntityOne.getId(), updatePhone.getId(), "Phone ID must be preserved");
+        assertEquals(phoneEntityOne.getUserId(), updatePhone.getUserId(), "Phone user ID must be preserved");
+
+        assertEquals(updatePhoneDTORequest.getAreaCode(), updatePhone.getAreaCode(), "Phone areacode must be updated correctly");
+
+        assertEquals(phoneEntityOne.getNumber(), updatePhone.getNumber(),"Phone number must keep the previous value when not provided");
+
+    }
+
+    @Test
+    void testUpdatePhoneKeepsOldValuesWhenRequestFieldsAreNull(){
+
+        Phone updatePhone = userConverter.updatePhone(updatePhoneWithNulls, phoneEntityOne);
+
+        assertEquals(phoneEntityOne.getId(), updatePhone.getId(), "Phone ID must be preserved");
+        assertEquals(phoneEntityOne.getUserId(), updatePhone.getUserId(), "Phone user ID must be preserved");
+        assertEquals(phoneEntityOne.getAreaCode(), updatePhone.getAreaCode(), "Phone areacode must remain unchanged when the request is nul");
+        assertEquals(phoneEntityOne.getNumber(), updatePhone.getNumber(), "Phone number must remain unchanged when the request is nul");
 
     }
 
 
 }
 
-
-
-
-
-//
-//
-//    @Test
-//    void testToUserEntitySuccess() {
-//        // Act
-//        User result = userConverter.toUserEntity(userDTORequest);
-//
-//        // Assert
-//        assertAll("Validar conversão de UserDTORequest para User",
-//                () -> assertNotNull(result, "User não deve ser nulo"),
-//                () -> assertEquals(userDTORequest.getName(), result.getName(), "Nome deve ser igual"),
-//                () -> assertEquals(userDTORequest.getEmail(), result.getEmail(), "Email deve ser igual"),
-//                () -> assertEquals(userDTORequest.getPassword(), result.getPassword(), "Senha deve ser igual"),
-//                () -> assertNull(result.getId(), "ID deve ser nulo (novo usuário)"),
-//                () -> assertNotNull(result.getAddresses(), "Addresses não deve ser nula"),
-//                () -> assertNotNull(result.getPhones(), "Phones não deve ser nula")
-//        );
-//    }
-//
-//    @Test
-//    void testToUserEntityWithoutAddresses() {
-//        // Arrange
-//        userDTORequest.setAddresses(null);
-//
-//        // Act
-//        User result = userConverter.toUserEntity(userDTORequest);
-//
-//        // Assert
-//        assertAll(
-//                () -> assertNotNull(result),
-//                () -> assertNull(result.getAddresses(), "Addresses deve ser nula")
-//        );
-//    }
-//
-//    @Test
-//    void testToUserEntityWithoutPhones() {
-//        // Arrange
-//        userDTORequest.setPhones(null);
-//
-//        // Act
-//        User result = userConverter.toUserEntity(userDTORequest);
-//
-//        // Assert
-//        assertAll(
-//                () -> assertNotNull(result),
-//                () -> assertNull(result.getPhones(), "Phones deve ser nula")
-//        );
-//    }
-//
-//    // ======================== TESTES: toAddressEntityByUserID ========================
-//    @Test
-//    void testToAddressEntitySuccess() {
-//        // Act
-//        Address result = userConverter.toAddressEntityByUserID(addressDTORequestOne);
-//
-//        // Assert
-//        assertAll("Validar conversão de AddressDTORequest para Address",
-//                () -> assertNotNull(result),
-//                () -> assertEquals(addressDTORequestOne.getStreet(), result.getStreet()),
-//                () -> assertEquals(addressDTORequestOne.getNumber(), result.getNumber()),
-//                () -> assertEquals(addressDTORequestOne.getCity(), result.getCity()),
-//                () -> assertEquals(addressDTORequestOne.getCep(), result.getCep()),
-//                () -> assertEquals(addressDTORequestOne.getState(), result.getState()),
-//                () -> assertEquals(addressDTORequestOne.getComplement(), result.getComplement()),
-//                () -> assertNull(result.getUserId(), "UserID deve ser nulo")
-//        );
-//    }
-//
-//    @Test
-//    void testToAddressEntityWithUserId() {
-//        // Arrange
-//        Long userId = 1L;
-//
-//        // Act
-//        Address result = userConverter.toAddressEntityByUserID(addressDTORequestOne, userId);
-//
-//        // Assert
-//        assertAll(
-//                () -> assertNotNull(result),
-//                () -> assertEquals(userId, result.getUserId(), "UserId deve ser igual"),
-//                () -> assertEquals(addressDTORequestOne.getStreet(), result.getStreet())
-//        );
-//    }
-//
-//    // ======================== TESTES: toAddressEntityList ========================
-//    @Test
-//    void testToAddressEntityListSuccess() {
-//        // Arrange - Criando múltiplos endereços
-//        AddressDTORequest addressEntityTwo = AddressDTORequestFixture
-//                .build(4L, "Rua Principal", 100L, "Apto 101", "São Paulo", "SP", "01310-100");
-//        List<AddressDTORequest> addressList = List.of(addressDTORequestOne, addressEntityTwo);
-//
-//        // Act
-//        List<Address> result = userConverter.toAddressEntityList(addressList);
-//
-//        // Assert
-//        assertAll("Validar conversão de lista de AddressDTORequest",
-//                () -> assertNotNull(result, "Lista não deve ser nula"),
-//                () -> assertEquals(addressList.size(), result.size(), "Tamanho da lista deve ser igual"),
-//                () -> assertEquals(addressDTORequestOne.getStreet(), result.get(0).getStreet()),
-//                () -> assertEquals(addressEntityTwo.getStreet(), result.get(1).getStreet())
-//        );
-//    }
-//
-//    @Test
-//    void testToAddressEntityListEmpty() {
-//        // Act
-//        List<Address> result = userConverter.toAddressEntityList(List.of());
-//
-//        // Assert
-//        assertNotNull(result);
-//        assertTrue(result.isEmpty(), "Lista deve estar vazia");
-//    }
-//
-//    // ======================== TESTES: toPhoneEntityByUserID ========================
-//    @Test
-//    void testToPhoneEntitySuccess() {
-//        // Act
-//        Phone result = userConverter.toPhoneEntityByUserID(phoneDTORequestOne);
-//
-//        // Assert
-//        assertAll("Validar conversão de PhoneDTORequest para Phone",
-//                () -> assertNotNull(result),
-//                () -> assertEquals(phoneDTORequestOne.getNumber(), result.getNumber()),
-//                () -> assertEquals(phoneDTORequestOne.getAreaCode(), result.getAreaCode()),
-//                () -> assertNull(result.getUserId(), "UserID deve ser nulo")
-//        );
-//    }
-//
-//    @Test
-//    void testToPhoneEntityWithUserId() {
-//        // Arrange
-//        Long userId = 1L;
-//
-//        // Act
-//        Phone result = userConverter.toPhoneEntityByUserID(phoneDTORequestOne, userId);
-//
-//        // Assert
-//        assertAll(
-//                () -> assertNotNull(result),
-//                () -> assertEquals(userId, result.getUserId()),
-//                () -> assertEquals(phoneDTORequestOne.getNumber(), result.getNumber())
-//        );
-//    }
-//
-//    // ======================== TESTES: toPhoneEntityList ========================
-//    @Test
-//    void testToPhoneEntityListSuccess() {
-//        // Arrange - Criando múltiplos telefones
-//        PhoneDTORequest phoneEntityTwo = PhoneDTORequestFixture.build(3L, "988887777", "11");
-//        List<PhoneDTORequest> phoneList = List.of(phoneDTORequestOne, phoneEntityTwo);
-//
-//        // Act
-//        List<Phone> result = userConverter.toPhoneEntityList(phoneList);
-//
-//        // Assert
-//        assertAll("Validar conversão de lista de PhoneDTORequest",
-//                () -> assertNotNull(result),
-//                () -> assertEquals(phoneList.size(), result.size()),
-//                () -> assertEquals(phoneDTORequestOne.getNumber(), result.get(0).getNumber()),
-//                () -> assertEquals(phoneEntityTwo.getNumber(), result.get(1).getNumber())
-//        );
-//    }
-//
-//    // ======================== TESTES: toUserResponse ========================
-//    @Test
-//    void testToUserResponseSuccess() {
-//        // Act
-//        UserDTOResponse result = userConverter.toUserResponse(user);
-//
-//        // Assert
-//        assertAll("Validar conversão de User para UserDTOResponse",
-//                () -> assertNotNull(result),
-//                () -> assertEquals(user.getId(), result.getId()),
-//                () -> assertEquals(user.getName(), result.getName()),
-//                () -> assertEquals(user.getEmail(), result.getEmail()),
-//                () -> assertEquals(user.getPassword(), result.getPassword()),
-//                () -> assertNotNull(result.getAddresses()),
-//                () -> assertNotNull(result.getPhones())
-//        );
-//    }
-//
-//    @Test
-//    void testToUserResponseWithoutAddresses() {
-//        // Arrange
-//        user.setAddresses(null);
-//
-//        // Act
-//        UserDTOResponse result = userConverter.toUserResponse(user);
-//
-//        // Assert
-//        assertAll(
-//                () -> assertNotNull(result),
-//                () -> assertNull(result.getAddresses())
-//        );
-//    }
-//
-//    // ======================== TESTES: toAddressResponseList ========================
-//    @Test
-//    void testToAddressResponseListSuccess() {
-//        // Act
-//        List<AddressDTOResponse> result = userConverter.toAddressResponseList(addressesList);
-//
-//        // Assert
-//        assertAll("Validar conversão de lista de Address",
-//                () -> assertNotNull(result),
-//                () -> assertEquals(addressesList.size(), result.size()),
-//                () -> assertEquals(addressEntityTwo.getStreet(), result.get(0).getStreet()),
-//                () -> assertEquals(addressEntityTwo.getId(), result.get(0).getId())
-//        );
-//    }
-//
-//    // ======================== TESTES: toAddressResponse ========================
-//    @Test
-//    void testToAddressResponseSuccess() {
-//        // Act
-//        AddressDTOResponse result = userConverter.toAddressResponse(addressEntityTwo);
-//
-//        // Assert
-//        assertAll("Validar conversão de Address para AddressDTOResponse",
-//                () -> assertNotNull(result),
-//                () -> assertEquals(addressEntityTwo.getId(), result.getId()),
-//                () -> assertEquals(addressEntityTwo.getStreet(), result.getStreet()),
-//                () -> assertEquals(addressEntityTwo.getNumber(), result.getNumber()),
-//                () -> assertEquals(addressEntityTwo.getCity(), result.getCity()),
-//                () -> assertEquals(addressEntityTwo.getCep(), result.getCep()),
-//                () -> assertEquals(addressEntityTwo.getState(), result.getState()),
-//                () -> assertEquals(addressEntityTwo.getComplement(), result.getComplement())
-//        );
-//    }
-//
-//    // ======================== TESTES: toPhoneResponseList ========================
-//    @Test
-//    void testToPhoneResponseListSuccess() {
-//        // Act
-//        List<PhoneDTOResponse> result = userConverter.toPhoneResponseList(phonesList);
-//
-//        // Assert
-//        assertAll("Validar conversão de lista de Phone",
-//                () -> assertNotNull(result),
-//                () -> assertEquals(phonesList.size(), result.size()),
-//                () -> assertEquals(phoneEntityTwo.getNumber(), result.get(0).getNumber()),
-//                () -> assertEquals(phoneEntityTwo.getId(), result.get(0).getId())
-//        );
-//    }
-//
-//    // ======================== TESTES: toPhoneResponse ========================
-//    @Test
-//    void testToPhoneResponseSuccess() {
-//        // Act
-//        PhoneDTOResponse result = userConverter.toPhoneResponse(phoneEntityTwo);
-//
-//        // Assert
-//        assertAll("Validar conversão de Phone para PhoneDTOResponse",
-//                () -> assertNotNull(result),
-//                () -> assertEquals(phoneEntityTwo.getId(), result.getId()),
-//                () -> assertEquals(phoneEntityTwo.getNumber(), result.getNumber()),
-//                () -> assertEquals(phoneEntityTwo.getAreaCode(), result.getAreaCode())
-//        );
-//    }
-//
-//    // ======================== TESTES: updateUser ========================
-//    @Test
-//    void testUpdateUserSuccess() {
-//        // Arrange
-//        UserDTORequest updateRequest = UserDTORequestFixture
-//                .build(null, "User Updated", "newemail@gmail.com", "5678", null, null);
-//
-//        // Act
-//        User result = userConverter.updateUser(updateRequest, user);
-//
-//        // Assert
-//        assertAll("Validar atualização de User",
-//                () -> assertNotNull(result),
-//                () -> assertEquals(user.getId(), result.getId(), "ID deve ser preservado"),
-//                () -> assertEquals("User Updated", result.getName()),
-//                () -> assertEquals("newemail@gmail.com", result.getEmail()),
-//                () -> assertEquals("5678", result.getPassword())
-//        );
-//    }
-//
-//    @Test
-//    void testUpdateUserKeepOldValues() {
-//        // Arrange - UserDTORequest com valores nulos
-//        UserDTORequest updateRequest = UserDTORequestFixture
-//                .build(null, null, null, null, null, null);
-//
-//        // Act
-//        User result = userConverter.updateUser(updateRequest, user);
-//
-//        // Assert
-//        assertAll(
-//                () -> assertEquals(user.getName(), result.getName()),
-//                () -> assertEquals(user.getEmail(), result.getEmail()),
-//                () -> assertEquals(user.getPassword(), result.getPassword())
-//        );
-//    }
-//
-//    // ======================== TESTES: updateAddress ========================
-//    @Test
-//    void testUpdateAddressSuccess() {
-//        // Arrange
-//        AddressDTORequest updateRequest = AddressDTORequestFixture
-//                .build(null, "Rua Nova", 999L, "Apto Novo", "Curitiba", "PR", "81000-000");
-//
-//        // Act
-//        Address result = userConverter.updateAddress(updateRequest, addressEntityTwo);
-//
-//        // Assert
-//        assertAll("Validar atualização de Address",
-//                () -> assertEquals(addressEntityTwo.getId(), result.getId()),
-//                () -> assertEquals(addressEntityTwo.getUserId(), result.getUserId()),
-//                () -> assertEquals("Rua Nova", result.getStreet()),
-//                () -> assertEquals(999L, result.getNumber()),
-//                () -> assertEquals("Curitiba", result.getCity())
-//        );
-//    }
-//
-//    @Test
-//    void testUpdateAddressKeepOldValues() {
-//        // Arrange
-//        AddressDTORequest updateRequest = AddressDTORequestFixture
-//                .build(null, null, null, null, null, null, null);
-//
-//        // Act
-//        Address result = userConverter.updateAddress(updateRequest, addressEntityTwo);
-//
-//        // Assert
-//        assertEquals(addressEntityTwo.getStreet(), result.getStreet());
-//    }
-//
-//    // ======================== TESTES: updatePhone ========================
-//    @Test
-//    void testUpdatePhoneSuccess() {
-//        // Arrange
-//        PhoneDTORequest updateRequest = PhoneDTORequestFixture
-//                .build(null, "999999999", "21");
-//
-//        // Act
-//        Phone result = userConverter.updatePhone(updateRequest, phoneEntityTwo);
-//
-//        // Assert
-//        assertAll("Validar atualização de Phone",
-//                () -> assertEquals(phoneEntityTwo.getId(), result.getId()),
-//                () -> assertEquals(phoneEntityTwo.getUserId(), result.getUserId()),
-//                () -> assertEquals("999999999", result.getNumber()),
-//                () -> assertEquals("21", result.getAreaCode())
-//        );
-//    }
-//
-//    @Test
-//    void testUpdatePhoneKeepOldValues() {
-//        // Arrange
-//        PhoneDTORequest updateRequest = PhoneDTORequestFixture
-//                .build(null, null, null);
-//
-//        // Act
-//        Phone result = userConverter.updatePhone(updateRequest, phoneEntityTwo);
-//
-//        // Assert
-//        assertEquals(phoneEntityTwo.getNumber(), result.getNumber());
-//    }
 
 

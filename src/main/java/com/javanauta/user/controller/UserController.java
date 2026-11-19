@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/usuario")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 @Tag(name = "Usuario", description = "Cadastro de Usuários")
 @SecurityRequirement(name = SecurityConfig.SECURITY_SCHEME)
@@ -58,7 +58,11 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody UserDTORequest userDtoRequest) {
-        return ResponseEntity.ok(userService.authenticateUser(userDtoRequest));
+
+        String userDTOResponse = userService.authenticateUser(userDtoRequest);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userDTOResponse);
     }
 
     @Operation(summary = "Busca usuário por email", description = "Busca as informações do usuário por email")
@@ -68,19 +72,26 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @GetMapping
     public ResponseEntity<UserDTOResponse> findUserByEmail(@RequestParam("email") String emailAddress) {
-        return ResponseEntity.ok(userService.findUserByEmail(emailAddress));
+        UserDTOResponse userDTOResponse = userService.findUserByEmail(emailAddress);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(userDTOResponse);
     }
 
+
     @Operation(summary = "Deleta usuário por email", description = "Deleta o usuário por email")
-    @ApiResponse(responseCode = "200", description = "Usuário deletado com sucesso")
+    @ApiResponse(responseCode = "204", description = "Usuário deletado com sucesso")
     @ApiResponse(responseCode = "401", description = "Usuário não autorizado")
     @ApiResponse(responseCode = "403", description = "Usuário não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     @DeleteMapping("/{email}")
-    public ResponseEntity<Void> deleteUserByEmail(@PathVariable String emailAddress) {
+    public ResponseEntity<String> deleteUserByEmail(@PathVariable("email") String emailAddress) {
 
         userService.deleteUserByEmail(emailAddress);
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("User deleted successfully");
     }
 
     @Operation(summary = "Atualiza dados do usuário", description = "Atualiza dados do usuário através do Token")
@@ -103,7 +114,7 @@ public class UserController {
     @ApiResponse(responseCode = "401", description = "Usuário não autorizado")
     @ApiResponse(responseCode = "403", description = "Endereço não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
-    @PutMapping("/endereco")
+    @PutMapping("/address")
     public ResponseEntity<AddressDTOResponse> updateAddress(@RequestBody AddressDTORequest addressDTORequest,
                                                             @RequestParam("id") Long addressId) {
 
@@ -119,7 +130,7 @@ public class UserController {
     @ApiResponse(responseCode = "401", description = "Usuário não autorizado")
     @ApiResponse(responseCode = "403", description = "Telefone não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
-    @PutMapping("/telefone")
+    @PutMapping("/phone")
     public ResponseEntity<PhoneDTOResponse> updatePhone(@RequestBody PhoneDTORequest phoneDTORequest,
                                                         @RequestParam("id") Long phoneId) {
 
@@ -132,7 +143,7 @@ public class UserController {
     @Operation(summary = "Salvar endereço do usuário", description = "Cria um novo endereço")
     @ApiResponse(responseCode = "200", description = "Endereço salvo com sucesso")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
-    @PostMapping("/endereco")
+    @PostMapping("/address")
     public ResponseEntity<AddressDTOResponse> addAddress(@RequestBody AddressDTORequest addressDtoRequest,
                                                          @RequestHeader("Authorization") String authToken) {
       AddressDTOResponse addressDTOResponse = userService.addAddressForUser(authToken, addressDtoRequest);
@@ -144,7 +155,7 @@ public class UserController {
     @Operation(summary = "Salvar telefone do usuário", description = "Cria um novo telefone")
     @ApiResponse(responseCode = "200", description = "Telefone salvo com sucesso")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
-    @PostMapping("/telefone")
+    @PostMapping("/phone")
     public ResponseEntity<PhoneDTOResponse> addPhone(@RequestBody PhoneDTORequest phoneDtoRequest,
                                                      @RequestHeader("Authorization") String authToken) {
         PhoneDTOResponse phoneDTOResponse = userService.addPhoneForUser(authToken, phoneDtoRequest);
@@ -157,7 +168,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "Informações encontradas com sucesso")
     @ApiResponse(responseCode = "403", description = "Dados não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
-    @GetMapping("/endereco/{cep}")
+    @GetMapping("/address/{cep}")
     public ResponseEntity<ViaCepDTO> fetchAddressByPostalCode(@PathVariable("cep") String postalCode) {
         return ResponseEntity.ok(viaCepService.fetchAddressByPostalCode(postalCode));
     }

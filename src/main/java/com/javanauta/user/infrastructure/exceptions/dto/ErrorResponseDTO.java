@@ -22,5 +22,8 @@ public class ErrorResponseDTO {
     private String message;
 
 
+
+
+
 }
 
