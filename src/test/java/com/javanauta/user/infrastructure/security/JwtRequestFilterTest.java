@@ -1,5 +1,4 @@
 package com.javanauta.user.infrastructure.security;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -20,12 +19,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-
 import java.io.IOException;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
 class JwtRequestFilterTest {
@@ -43,7 +49,7 @@ class JwtRequestFilterTest {
     private MockHttpServletResponse response;
     private FilterChain filterChain;
 
-    private static final String TOKEN = "token-valido";
+    private static final String TOKEN = "valid-token";
     private static final String USERNAME = "user@gmail.com";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -71,7 +77,7 @@ class JwtRequestFilterTest {
         verify(filterChain).doFilter(request, response);
         verifyNoInteractions(jwtUtil, userDetailsService);
 
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertNull(SecurityContextHolder.getContext().getAuthentication(), "A missing Authorization header should not authenticate the request");
 
     }
 
@@ -85,7 +91,7 @@ class JwtRequestFilterTest {
         verify(filterChain).doFilter(request, response);
         verifyNoInteractions(jwtUtil, userDetailsService);
 
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertNull(SecurityContextHolder.getContext().getAuthentication(), "A non-Bearer Authorization header should not authenticate the request");
 
     }
 
@@ -112,10 +118,10 @@ class JwtRequestFilterTest {
 
        var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        assertNotNull(authentication);
-        assertTrue(authentication.isAuthenticated());
-        assertEquals(USERNAME, authentication.getName());
-        assertEquals(userDetails, authentication.getPrincipal());
+        assertNotNull(authentication, "A valid token should create an authentication object");
+        assertTrue(authentication.isAuthenticated(), "The authentication created by a valid token should be authenticated");
+        assertEquals(USERNAME, authentication.getName(), "The authenticated principal should use the token username");
+        assertEquals(userDetails, authentication.getPrincipal(), "The authentication principal should be the loaded UserDetails");
 
 
         verify(jwtUtil).extractEmailFromToken(TOKEN);
@@ -146,7 +152,8 @@ class JwtRequestFilterTest {
 
         assertSame(
                 existingAuthentication,
-                SecurityContextHolder.getContext().getAuthentication()
+                SecurityContextHolder.getContext().getAuthentication(),
+                "Existing authentication should remain in the security context"
         );
 
         verify(jwtUtil).extractEmailFromToken(TOKEN);
@@ -167,7 +174,7 @@ class JwtRequestFilterTest {
 
         jwtRequestFilter.doFilterInternal(request, response, filterChain);
 
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertNull(SecurityContextHolder.getContext().getAuthentication(), "A token with no extractable username should not authenticate the request");
 
         verify(jwtUtil).extractEmailFromToken(TOKEN);
         verifyNoInteractions(userDetailsService);
@@ -197,7 +204,7 @@ class JwtRequestFilterTest {
         jwtRequestFilter.doFilterInternal(request, response, filterChain);
 
 
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertNull(SecurityContextHolder.getContext().getAuthentication(), "A token that fails validation should not authenticate the request");
 
         verify(jwtUtil).extractEmailFromToken(TOKEN);
         verify(userDetailsService).loadUserByUsername(USERNAME);
@@ -223,15 +230,15 @@ class JwtRequestFilterTest {
 
         jwtRequestFilter.doFilterInternal(request, response, filterChain);
 
-        assertEquals(401, response.getStatus());
-        assertTrue(response.getContentType().contains("application/json"));
+        assertEquals(401, response.getStatus(), "An expired token should produce an unauthorized HTTP status");
+        assertTrue(response.getContentType().contains("application/json"), "The expired-token error response should use JSON content");
 
         JsonNode error = objectMapper.readTree(response.getContentAsString());
 
-        assertEquals("Token expired", error.get("message").asText());
-        assertEquals("JWT expired", error.get("error").asText());
+        assertEquals("Token expired", error.get("message").asText(), "The error body should describe the expired token");
+        assertEquals("JWT expired", error.get("error").asText(), "The error body should preserve the JWT exception message");
 
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertNull(SecurityContextHolder.getContext().getAuthentication(), "An expired token should leave the security context unauthenticated");
 
         verify(jwtUtil).extractEmailFromToken(TOKEN);
         verifyNoInteractions(userDetailsService);

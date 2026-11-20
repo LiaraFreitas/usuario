@@ -69,7 +69,7 @@ public class UserService {
            );
            return "Bearer " + jwtUtil.generateToken(authentication.getName());
        } catch (BadCredentialsException | UsernameNotFoundException | AuthorizationDeniedException e) {
-           throw new UnauthorizedException(INVALID_USERNAME, e.getCause());
+           throw new UnauthorizedException(INVALID_USERNAME, e);
        }
    }
 

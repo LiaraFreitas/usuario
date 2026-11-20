@@ -1,9 +1,19 @@
 package com.javanauta.user.infrastructure.exceptions;
 
+import java.io.Serial;
+
 public class ResourceNotFoundException extends RuntimeException {
 
-    public ResourceNotFoundException(String mensagem) {
-        super(mensagem);
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+
+    public  ResourceNotFoundException(String message, Throwable throwable){
+        super(message, throwable);
     }
 
 }

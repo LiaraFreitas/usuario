@@ -1,10 +1,14 @@
 package com.javanauta.user.infrastructure.security;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Date;
 
@@ -25,10 +29,14 @@ public class JwtUtil {
 
     // Gera um token JWT com o nome de usuário e validade de 1 hora
     public String generateToken(String username) {
+
+        Instant issuedAt = Instant.now();
+        Instant expiration = issuedAt.plus(1, ChronoUnit.HOURS);
+
         return Jwts.builder()
                 .subject(username) // Define o email de usuário como o assunto do token
-                .issuedAt(new Date()) // Define a data e hora de emissão do token
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Define a data e hora de expiração (1 hora a partir da emissão)
+                .issuedAt(Date.from(issuedAt)) // Define a data e hora de emissão do token
+                .expiration(Date.from(expiration)) // Define a data e hora de expiração (1 hora a partir da emissão)
                 .signWith(getSecretKey()) // Converte a chave secreta em bytes e assina o token com ela
                 .compact(); // Constrói o token JWT
     }
@@ -50,7 +58,7 @@ public class JwtUtil {
     // Verifica se o token JWT está expirado
     public boolean isTokenExpired(String token) {
         // Compara a data de expiração do token com a data atual
-        return extractClaims(token).getExpiration().before(new Date());
+        return extractClaims(token).getExpiration().toInstant().isBefore(Instant.now());
     }
 
     // Valida o token JWT verificando o nome de usuário e se o token não está expirado

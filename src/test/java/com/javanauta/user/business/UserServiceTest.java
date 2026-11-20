@@ -1,5 +1,4 @@
 package com.javanauta.user.business;
-
 import com.javanauta.user.business.converter.UserConverter;
 import com.javanauta.user.business.dto.in.AddressDTORequest;
 import com.javanauta.user.business.dto.in.AddressDTORequestFixture;
@@ -39,17 +38,28 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.util.List;
 import java.util.Optional;
-
-import static com.javanauta.user.business.UserService.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.javanauta.user.business.UserService.EMAIL_NOT_FOUND;
+import static com.javanauta.user.business.UserService.ID_NOT_FOUND;
+import static com.javanauta.user.business.UserService.INVALID_USERNAME;
+import static com.javanauta.user.business.UserService.REGISTERED_EMAIL;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
  class UserServiceTest {
+
+    private static final String JWT_TOKEN = "my-token-jwt";
 
     @InjectMocks
     private UserService userService;
@@ -233,8 +243,8 @@ import static org.mockito.Mockito.*;
 
         //assert - verificar
 
-        assertNotNull(response);
-        assertEquals(response, userDTOResponse);
+        assertNotNull(response, "Creating a user should return a response DTO");
+        assertEquals(response, userDTOResponse, "The created user response should match the converter result");
 
         ArgumentCaptor<UserDTORequest> requestArgumentCaptor =
                 ArgumentCaptor.forClass(UserDTORequest.class);
@@ -251,8 +261,8 @@ import static org.mockito.Mockito.*;
         inOrder.verify(userConverter).toUserResponse(userEntity);
 
 
-        assertEquals(encodedPassword, requestArgumentCaptor.getValue().getPassword());
-        assertEquals(encodedPassword, userArgumentCaptor.getValue().getPassword());
+        assertEquals(encodedPassword, requestArgumentCaptor.getValue().getPassword(), "The encoded password should be assigned to the request entity");
+        assertEquals(encodedPassword, userArgumentCaptor.getValue().getPassword(), "The encoded password should be stored on the user entity");
 
     }
 
@@ -271,7 +281,7 @@ import static org.mockito.Mockito.*;
             userService.createUser(userDTORequest);
         });
 
-        assertEquals(REGISTERED_EMAIL + userDTORequest.getEmail(), exception.getMessage());
+        assertEquals(REGISTERED_EMAIL + userDTORequest.getEmail(), exception.getMessage(), "Registration with an existing email should report the registered-email conflict");
 
     }
 
@@ -285,11 +295,11 @@ import static org.mockito.Mockito.*;
                 .thenReturn(userDTORequest.getEmail());
 
         when(jwtUtil.generateToken(userDTORequest.getEmail()))
-                .thenReturn("meu-token-jwt");
+                .thenReturn(JWT_TOKEN);
 
         String response = userService.authenticateUser(userDTORequest);
 
-        assertEquals("Bearer meu-token-jwt", response);
+        assertEquals("Bearer " + JWT_TOKEN, response, "Authentication should return a Bearer token");
     }
 
     @Test
@@ -303,7 +313,7 @@ import static org.mockito.Mockito.*;
                 UnauthorizedException.class,
                 () -> userService.authenticateUser(userDTORequest));
 
-        assertEquals(INVALID_USERNAME, exception.getMessage());
+        assertEquals(INVALID_USERNAME, exception.getMessage(), "Authentication failures should report the invalid-username message");
 
 
         verify(authenticationManager).authenticate(
@@ -324,7 +334,7 @@ import static org.mockito.Mockito.*;
                 UnauthorizedException.class,
                 () -> userService.authenticateUser(userDTORequest));
 
-        assertEquals(INVALID_USERNAME, exception.getMessage());
+        assertEquals(INVALID_USERNAME, exception.getMessage(), "Authentication failures should report the invalid-username message");
 
 
         verify(authenticationManager).authenticate(
@@ -344,7 +354,7 @@ import static org.mockito.Mockito.*;
                 UnauthorizedException.class,
                 () -> userService.authenticateUser(userDTORequest));
 
-        assertEquals(INVALID_USERNAME, exception.getMessage());
+        assertEquals(INVALID_USERNAME, exception.getMessage(), "Authentication failures should report the invalid-username message");
 
 
         verify(authenticationManager).authenticate(
@@ -368,7 +378,7 @@ import static org.mockito.Mockito.*;
 
         UserDTOResponse response = userService.findUserByEmail(email);
 
-        assertEquals(userDTOResponse, response);
+        assertEquals(userDTOResponse, response, "The service should return the converted user DTO");
 
         verify(userConverter).toUserResponse(userEntity);
         verify(userRepository).findByEmail(email);
@@ -387,7 +397,7 @@ import static org.mockito.Mockito.*;
            userService.findUserByEmail(email);
         });
 
-        assertEquals(EMAIL_NOT_FOUND + userEntity.getEmail(), exception.getMessage());
+        assertEquals(EMAIL_NOT_FOUND + userEntity.getEmail(), exception.getMessage(), "The missing-user exception should include the requested email");
     }
 
 
@@ -409,7 +419,7 @@ import static org.mockito.Mockito.*;
     @Test
     void updateUserWithSucess(){
 
-        String authToken = "Bearer meu-token-jwt";
+        String authToken = "Bearer " + JWT_TOKEN;
         String email = userDTORequest.getEmail();
 
 
@@ -418,7 +428,7 @@ import static org.mockito.Mockito.*;
 
         userEntity.setPassword(encodedPassword);
 
-        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+        when(jwtUtil.extractEmailFromToken(JWT_TOKEN))
                 .thenReturn(email);
 
 
@@ -440,10 +450,10 @@ import static org.mockito.Mockito.*;
 
         UserDTOResponse response = userService.updateUser(authToken, userDTORequest);
 
-        assertEquals(userDTOResponse, response);
+        assertEquals(userDTOResponse, response, "The service should return the converted user DTO");
 
 
-        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(jwtUtil).extractEmailFromToken(JWT_TOKEN);
         verify(passwordEncoder).encode(anyString());
         verify(userRepository).findByEmail(email);
         verify(userConverter).updateUser(userDTORequest, userEntity);
@@ -456,7 +466,7 @@ import static org.mockito.Mockito.*;
     @Test
     void updateUserWhenUserDoesNotExist(){
 
-        String authToken = "Bearer meu-token-jwt";
+        String authToken = "Bearer " + JWT_TOKEN;
         String email = userDTORequest.getEmail();
 
 
@@ -465,7 +475,7 @@ import static org.mockito.Mockito.*;
 
         userEntity.setPassword(encodedPassword);
 
-        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+        when(jwtUtil.extractEmailFromToken(JWT_TOKEN))
                 .thenReturn(email);
 
 
@@ -480,9 +490,9 @@ import static org.mockito.Mockito.*;
             userService.updateUser(authToken, userDTORequest);
         });
 
-        assertEquals(EMAIL_NOT_FOUND, exception.getMessage());
+        assertEquals(EMAIL_NOT_FOUND, exception.getMessage(), "The missing-user exception should use the email-not-found message");
 
-        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(jwtUtil).extractEmailFromToken(JWT_TOKEN);
         verify(userRepository).findByEmail(email);
 
         verify(userConverter, never()).updateUser(any(), any());
@@ -508,7 +518,7 @@ import static org.mockito.Mockito.*;
 
         AddressDTOResponse response = userService.updateAddress(addressID, addressDTORequestOne);
 
-        assertEquals(addressDTOResponse, response);
+        assertEquals(addressDTOResponse, response, "The service should return the converted address DTO");
 
         verify(addressRepository).findById(addressID);
         verify(addressRepository).save(addressEntityOne);
@@ -528,7 +538,7 @@ import static org.mockito.Mockito.*;
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () ->
                 userService.updateAddress(addressID, addressDTORequestOne));
 
-        assertEquals(ID_NOT_FOUND + addressID, exception.getMessage());
+        assertEquals(ID_NOT_FOUND + addressID, exception.getMessage(), "The missing-address exception should include the address ID");
 
 
     }
@@ -551,7 +561,7 @@ import static org.mockito.Mockito.*;
 
         PhoneDTOResponse response = userService.updatePhone(phoneID, phoneDTORequestOne);
 
-        assertEquals(phoneDTOResponse, response);
+        assertEquals(phoneDTOResponse, response, "The service should return the converted phone DTO");
 
         verify(phoneRepository).findById(phoneID);
         verify(phoneRepository).save(phoneEntityOne);
@@ -570,19 +580,19 @@ import static org.mockito.Mockito.*;
                 userService.updatePhone(phoneID, phoneDTORequestOne));
 
 
-        assertEquals(ID_NOT_FOUND + phoneID, exception.getMessage());
+        assertEquals(ID_NOT_FOUND + phoneID, exception.getMessage(), "The missing-phone exception should include the phone ID");
 
     }
 
     @Test
     void addAddressForUserWithSucess(){
 
-        String authToken = "Bearer meu-token-jwt";
+        String authToken = "Bearer " + JWT_TOKEN;
         String email = userDTORequest.getEmail();
 
 
 
-        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+        when(jwtUtil.extractEmailFromToken(JWT_TOKEN))
                 .thenReturn(email);
 
 
@@ -601,9 +611,9 @@ import static org.mockito.Mockito.*;
         AddressDTOResponse response = userService.addAddressForUser(authToken, addressDTORequestOne);
 
 
-        assertEquals(addressDTOResponse, response);
+        assertEquals(addressDTOResponse, response, "The service should return the converted address DTO");
 
-        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(jwtUtil).extractEmailFromToken(JWT_TOKEN);
         verify(userRepository).findByEmail(email);
         verify(userConverter).toAddressEntity(addressDTORequestOne, userEntity.getId());
         verify(addressRepository).save(addressEntityOne);
@@ -613,11 +623,11 @@ import static org.mockito.Mockito.*;
 
     @Test
     void addAddressWhenUserNotFound(){
-        String authToken = "Bearer meu-token-jwt";
+        String authToken = "Bearer " + JWT_TOKEN;
         String email = userDTORequest.getEmail();
 
 
-        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+        when(jwtUtil.extractEmailFromToken(JWT_TOKEN))
                 .thenReturn(email);
 
 
@@ -628,9 +638,9 @@ import static org.mockito.Mockito.*;
             userService.addAddressForUser(authToken, addressDTORequestOne);
         });
 
-        assertEquals(EMAIL_NOT_FOUND + email, exception.getMessage());
+        assertEquals(EMAIL_NOT_FOUND + email, exception.getMessage(), "The missing-user exception should include the requested email");
 
-        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(jwtUtil).extractEmailFromToken(JWT_TOKEN);
         verify(userRepository).findByEmail(email);
         verify(userConverter, never()).toAddressEntity(any(AddressDTORequest.class), anyLong());
         verify(addressRepository, never()).save(any(Address.class));
@@ -642,12 +652,12 @@ import static org.mockito.Mockito.*;
     void addPhoneForUserWithSucess(){
 
 
-        String authToken = "Bearer meu-token-jwt";
+        String authToken = "Bearer " + JWT_TOKEN;
         String email = userDTORequest.getEmail();
 
 
 
-        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+        when(jwtUtil.extractEmailFromToken(JWT_TOKEN))
                 .thenReturn(email);
 
 
@@ -666,9 +676,9 @@ import static org.mockito.Mockito.*;
         PhoneDTOResponse response = userService.addPhoneForUser(authToken, phoneDTORequestOne);
 
 
-        assertEquals(phoneDTOResponse, response);
+        assertEquals(phoneDTOResponse, response, "The service should return the converted phone DTO");
 
-        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(jwtUtil).extractEmailFromToken(JWT_TOKEN);
         verify(userRepository).findByEmail(email);
         verify(userConverter).toPhoneEntity(phoneDTORequestOne, userEntity.getId());
         verify(phoneRepository).save(phoneEntityOne);
@@ -679,11 +689,11 @@ import static org.mockito.Mockito.*;
 
     @Test
     void addPhoneWhenUserNotFound(){
-        String authToken = "Bearer meu-token-jwt";
+        String authToken = "Bearer " + JWT_TOKEN;
         String email = userDTORequest.getEmail();
 
 
-        when(jwtUtil.extractEmailFromToken("meu-token-jwt"))
+        when(jwtUtil.extractEmailFromToken(JWT_TOKEN))
                 .thenReturn(email);
 
 
@@ -694,9 +704,9 @@ import static org.mockito.Mockito.*;
             userService.addPhoneForUser(authToken, phoneDTORequestOne);
         });
 
-        assertEquals(EMAIL_NOT_FOUND + email, exception.getMessage());
+        assertEquals(EMAIL_NOT_FOUND + email, exception.getMessage(), "The missing-user exception should include the requested email");
 
-        verify(jwtUtil).extractEmailFromToken("meu-token-jwt");
+        verify(jwtUtil).extractEmailFromToken(JWT_TOKEN);
         verify(userRepository).findByEmail(email);
         verify(userConverter, never()).toPhoneEntity(any(PhoneDTORequest.class), anyLong());
         verify(phoneRepository, never()).save(any(Phone.class));
