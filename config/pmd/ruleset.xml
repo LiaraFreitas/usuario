@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Custom PMD Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0">
+
+    <description>Custom PMD Rules.</description>
+
+    <!-- ERROR PRONE -->
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidDuplicateLiterals"/>
+    </rule>
+
+    <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
+        <properties>
+            <property name="maxDuplicateLiterals" value="10"/>
+            <property name="minimumLength" value="4"/>
+            <property name="skipAnnotations" value="true"/>
+        </properties>
+    </rule>
+
+    <!-- BEST PRACTICES -->
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="ImplicitFunctionalInterface"/>
+    </rule>
+
+    <rule ref="category/java/bestpractices.xml/UnitTestShouldIncludeAssert">
+        <properties>
+            <property name="extraAssertMethodNames" value="andExpect"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/bestpractices.xml/UnitTestContainsTooManyAsserts">
+        <properties>
+            <property name="maximumAsserts" value="10"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/bestpractices.xml/ImplicitFunctionalInterface">
+        <properties>
+            <property name="violationSuppressXPath">
+                <value>
+                    ./ancestor-or-self::ClassDeclaration[@SimpleName = 'ViaCepClient']
+                </value>
+            </property>
+        </properties>
+    </rule>
+
+</ruleset>
