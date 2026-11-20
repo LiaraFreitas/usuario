@@ -15,10 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
 import java.util.List;
 
 @Getter
@@ -33,7 +30,7 @@ import java.util.List;
     }
 )
 
-public class User implements UserDetails {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,19 +48,5 @@ public class User implements UserDetails {
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private List<Phone> phones;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
 }
 

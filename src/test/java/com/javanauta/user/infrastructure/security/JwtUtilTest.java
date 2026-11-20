@@ -1,5 +1,4 @@
 package com.javanauta.user.infrastructure.security;
-
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -9,14 +8,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
  class JwtUtilTest {
@@ -50,9 +52,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
         String token = jwtUtil.generateToken(USERNAME);
 
-        assertNotNull(token);
-        assertFalse(token.isBlank());
-        assertEquals(USERNAME, jwtUtil.extractEmailFromToken(token));
+        assertNotNull(token, "Generating a JWT should return a token");
+        assertFalse(token.isBlank(), "The generated JWT should not be blank");
+        assertEquals(USERNAME, jwtUtil.extractEmailFromToken(token), "The token subject should contain the supplied username");
     }
 
 
@@ -62,11 +64,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
         var claims = jwtUtil.extractClaims(token);
 
-        assertNotNull(claims);
-        assertEquals(USERNAME, claims.getSubject());
-        assertNotNull(claims.getIssuedAt());
-        assertNotNull(claims.getExpiration());
-        assertTrue(claims.getExpiration().after(claims.getIssuedAt()));
+        assertNotNull(claims, "A valid JWT should expose its claims");
+        assertEquals(USERNAME, claims.getSubject(), "The JWT subject should match the supplied username");
+        assertNotNull(claims.getIssuedAt(), "The JWT claims should include an issued-at date");
+        assertNotNull(claims.getExpiration(), "The JWT claims should include an expiration date");
+        assertTrue(claims.getExpiration().toInstant().isAfter(claims.getIssuedAt().toInstant()), "The JWT expiration should occur after its issued-at date");
     }
 
     @Test
@@ -76,7 +78,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
         String email = jwtUtil.extractEmailFromToken(token);
 
-        assertEquals(USERNAME, email);
+        assertEquals(USERNAME, email, "Email extraction should return the JWT subject");
 
 
     }
@@ -88,14 +90,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
         boolean expired = jwtUtil.isTokenExpired(token);
 
-        assertFalse(expired);
+        assertFalse(expired, "A newly generated JWT should not be expired");
 
     }
 
     @Test
     void shouldThrowExpiredJwtExceptionWhenTokenIsExpired(){
 
-        String expiredToken = generateExpiredToken(USERNAME);
+        String expiredToken = generateExpiredToken();
 
         assertThrows(
                 ExpiredJwtException.class,
@@ -107,7 +109,7 @@ import static org.junit.jupiter.api.Assertions.*;
     @Test
     void shouldThrowSignatureExceptionWhenTokenWasSignedWithAnotherKey(){
 
-        String token = generateTokenWithAnotherKey(USERNAME);
+        String token = generateTokenWithAnotherKey();
 
         assertThrows(
                 SignatureException.class,
@@ -127,31 +129,33 @@ import static org.junit.jupiter.api.Assertions.*;
         );
     }
 
-    private String generateExpiredToken(String username) {
+    private String generateExpiredToken() {
         SecretKey key = Keys.hmacShaKeyFor(
                 Base64.getDecoder().decode(SECRET_KEY)
         );
 
-        long currentTime = System.currentTimeMillis();
+        Instant now = Instant.now();
 
         return Jwts.builder()
-                .subject(username)
-                .issuedAt(new Date(currentTime - 7_200_000))
-                .expiration(new Date(currentTime - 3_600_000))
+                .subject(JwtUtilTest.USERNAME)
+                .issuedAt(Date.from(now.minusSeconds(7_200)))
+                .expiration(Date.from(now.minusSeconds(3_600)))
                 .signWith(key)
                 .compact();
     }
 
-    private String generateTokenWithAnotherKey(String username){
+    private String generateTokenWithAnotherKey(){
 
         SecretKey key =  Keys.hmacShaKeyFor(
                 Base64.getDecoder().decode(OTHER_SECRET_KEY)
         );
 
+        Instant now = Instant.now();
+
         return  Jwts.builder()
-                .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 3_600_000))
+                .subject(JwtUtilTest.USERNAME)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusSeconds(3_600)))
                 .signWith(key)
                 .compact();
 

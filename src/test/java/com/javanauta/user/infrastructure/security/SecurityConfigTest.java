@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -58,6 +59,7 @@ class SecurityConfigTest {
 
     @TestConfiguration
     @EnableWebMvc
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     static class TestConfig {
 
         @Bean
@@ -67,6 +69,7 @@ class SecurityConfigTest {
     }
 
     @RestController
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     static class TestController {
 
         @GetMapping("/user/profile")
@@ -113,21 +116,21 @@ class SecurityConfigTest {
 
         String encodedPassword = passwordEncoder.encode(password);
 
-        assertNotEquals(password, encodedPassword);
-        assertTrue(passwordEncoder.matches(password, encodedPassword));
+        assertNotEquals(password, encodedPassword, "BCrypt should encode the plain-text password");
+        assertTrue(passwordEncoder.matches(password, encodedPassword), "BCrypt should verify the original password against its encoded value");
 
 
     }
 
     @Test
     void shouldExposeAuthenticationManagerBean(){
-        assertNotNull(authenticationManager);
+        assertNotNull(authenticationManager, "Security configuration should expose an AuthenticationManager bean");
     }
 
     @Test
     void shouldAllowAccessToProtectedEndpointWithValidToken() throws Exception {
 
-        String token = "token-valido";
+        String token = "valid-token";
         String email = "teste@email.com";
 
         UserDetails userDetails = User.withUsername(email)
@@ -154,7 +157,7 @@ class SecurityConfigTest {
     @Test
     void shouldDenyAccessWhenTokenIsInvalid() throws Exception {
 
-        String token = "token-invalido";
+        String token = "invalid-token";
         String email = "teste@email.com";
 
         UserDetails userDetails = User.withUsername(email)

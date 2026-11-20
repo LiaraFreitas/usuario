@@ -1,14 +1,20 @@
 package com.javanauta.user.infrastructure.exceptions;
 import org.springframework.security.core.AuthenticationException;
 
+import java.io.Serial;
+
 public class UnauthorizedException extends AuthenticationException {
 
-    public UnauthorizedException(String mensagem) {
-        super(mensagem);
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+
+    public UnauthorizedException(String message) {
+        super(message);
     }
 
-    public UnauthorizedException(String mensagem, Throwable throwable) {
-        super(mensagem, throwable);
+    public UnauthorizedException(String message, Throwable throwable) {
+        super(message, throwable);
     }
 }
 
